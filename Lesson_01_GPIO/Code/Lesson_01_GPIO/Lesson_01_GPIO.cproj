@@ -111,6 +111,12 @@
     <Compile Include="config\config.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="drivers\button.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="drivers\button.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="drivers\led.c">
       <SubType>compile</SubType>
     </Compile>

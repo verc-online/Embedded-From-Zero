@@ -7,11 +7,16 @@ Discarded input sections
 
  .data          0x00000000        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega8/avr4/crtatmega8.o
  .bss           0x00000000        0x0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega8/avr4/crtatmega8.o
+ .text          0x00000000        0x0 drivers/button.o
+ .data          0x00000000        0x0 drivers/button.o
+ .bss           0x00000000        0x0 drivers/button.o
  .text          0x00000000        0x0 drivers/led.o
  .data          0x00000000        0x0 drivers/led.o
  .bss           0x00000000        0x0 drivers/led.o
  .text.Led_Toggle
                 0x00000000        0xa drivers/led.o
+ .text.Led_Blink
+                0x00000000       0x34 drivers/led.o
  .text          0x00000000        0x0 main.o
  .data          0x00000000        0x0 main.o
  .bss           0x00000000        0x0 main.o
@@ -47,6 +52,7 @@ user_signatures  0x00850000         0x00000400         rw !x
 Linker script and memory map
 
 LOAD C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega8/avr4/crtatmega8.o
+LOAD drivers/button.o
 LOAD drivers/led.o
 LOAD main.o
 START GROUP
@@ -156,7 +162,7 @@ END GROUP
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000       0x96
+.text           0x00000000       0x70
  *(.vectors)
  .vectors       0x00000000       0x26 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega8/avr4/crtatmega8.o
                 0x00000000                __vector_default
@@ -232,23 +238,26 @@ END GROUP
                 0x00000036                __vector_18
                 0x00000038                . = ALIGN (0x2)
  *(.text.*)
+ .text.Button_Init
+                0x00000038        0x6 drivers/button.o
+                0x00000038                Button_Init
+ .text.Button_IsPressed
+                0x0000003e        0xe drivers/button.o
+                0x0000003e                Button_IsPressed
  .text.Led_Init
-                0x00000038        0x4 drivers/led.o
-                0x00000038                Led_Init
- .text.Led_On   0x0000003c        0x4 drivers/led.o
-                0x0000003c                Led_On
- .text.Led_Off  0x00000040        0x4 drivers/led.o
-                0x00000040                Led_Off
- .text.Led_Blink
-                0x00000044       0x34 drivers/led.o
-                0x00000044                Led_Blink
- .text.main     0x00000078       0x1a main.o
-                0x00000078                main
-                0x00000092                . = ALIGN (0x2)
+                0x0000004c        0x6 drivers/led.o
+                0x0000004c                Led_Init
+ .text.Led_On   0x00000052        0x4 drivers/led.o
+                0x00000052                Led_On
+ .text.Led_Off  0x00000056        0x4 drivers/led.o
+                0x00000056                Led_Off
+ .text.main     0x0000005a       0x12 main.o
+                0x0000005a                main
+                0x0000006c                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x00000092        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr4\libgcc.a(_exit.o)
-                0x00000092                _exit
-                0x00000092                exit
+ .fini9         0x0000006c        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr4\libgcc.a(_exit.o)
+                0x0000006c                _exit
+                0x0000006c                exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -267,11 +276,11 @@ END GROUP
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x00000092        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr4\libgcc.a(_exit.o)
+ .fini0         0x0000006c        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr4\libgcc.a(_exit.o)
  *(.fini0)
-                0x00000096                _etext = .
+                0x00000070                _etext = .
 
-.data           0x00800060        0x0 load address 0x00000096
+.data           0x00800060        0x0 load address 0x00000070
                 [!provide]                PROVIDE (__data_start, .)
  *(.data)
  *(.data*)
@@ -289,8 +298,8 @@ END GROUP
  *(.bss*)
  *(COMMON)
                 [!provide]                PROVIDE (__bss_end, .)
-                0x00000096                __data_load_start = LOADADDR (.data)
-                0x00000096                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x00000070                __data_load_start = LOADADDR (.data)
+                0x00000070                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x00800060        0x0
                 [!provide]                PROVIDE (__noinit_start, .)
@@ -338,8 +347,9 @@ END GROUP
 
 .comment        0x00000000       0x30
  *(.comment)
- .comment       0x00000000       0x30 drivers/led.o
+ .comment       0x00000000       0x30 drivers/button.o
                                  0x31 (size before relaxing)
+ .comment       0x00000030       0x31 drivers/led.o
  .comment       0x00000030       0x31 main.o
 
 .note.gnu.avr.deviceinfo
@@ -362,46 +372,54 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000       0x60
+.debug_aranges  0x00000000       0x88
  *(.debug_aranges)
  .debug_aranges
-                0x00000000       0x40 drivers/led.o
+                0x00000000       0x28 drivers/button.o
  .debug_aranges
-                0x00000040       0x20 main.o
+                0x00000028       0x40 drivers/led.o
+ .debug_aranges
+                0x00000068       0x20 main.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000      0x797
+.debug_info     0x00000000      0x7f1
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x48c C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega8/avr4/crtatmega8.o
- .debug_info    0x0000048c      0x1d1 drivers/led.o
- .debug_info    0x0000065d      0x13a main.o
+ .debug_info    0x0000048c       0xa4 drivers/button.o
+ .debug_info    0x00000530      0x1d1 drivers/led.o
+ .debug_info    0x00000701       0xf0 main.o
 
-.debug_abbrev   0x00000000      0x645
+.debug_abbrev   0x00000000      0x61b
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x44e C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega8/avr4/crtatmega8.o
- .debug_abbrev  0x0000044e       0xfa drivers/led.o
- .debug_abbrev  0x00000548       0xfd main.o
+ .debug_abbrev  0x0000044e       0x6b drivers/button.o
+ .debug_abbrev  0x000004b9       0xfa drivers/led.o
+ .debug_abbrev  0x000005b3       0x68 main.o
 
-.debug_line     0x00000000      0x3e5
+.debug_line     0x00000000      0x3fb
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x109 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega8/avr4/crtatmega8.o
- .debug_line    0x00000109      0x1a8 drivers/led.o
- .debug_line    0x000002b1      0x134 main.o
+ .debug_line    0x00000109       0xcb drivers/button.o
+ .debug_line    0x000001d4      0x1ae drivers/led.o
+ .debug_line    0x00000382       0x79 main.o
 
-.debug_frame    0x00000000       0x94
+.debug_frame    0x00000000       0xc8
  *(.debug_frame)
- .debug_frame   0x00000000       0x70 drivers/led.o
- .debug_frame   0x00000070       0x24 main.o
+ .debug_frame   0x00000000       0x34 drivers/button.o
+ .debug_frame   0x00000034       0x70 drivers/led.o
+ .debug_frame   0x000000a4       0x24 main.o
 
-.debug_str      0x00000000      0x360
+.debug_str      0x00000000      0x397
  *(.debug_str)
  .debug_str     0x00000000      0x17a C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega8/avr4/crtatmega8.o
- .debug_str     0x0000017a      0x1d5 drivers/led.o
+ .debug_str     0x0000017a      0x17d drivers/button.o
+                                0x1b1 (size before relaxing)
+ .debug_str     0x000002f7       0x8f drivers/led.o
                                 0x209 (size before relaxing)
- .debug_str     0x0000034f       0x11 main.o
-                                0x1e1 (size before relaxing)
+ .debug_str     0x00000386       0x11 main.o
+                                0x1b8 (size before relaxing)
 
 .debug_loc      0x00000000      0x10a
  *(.debug_loc)
@@ -425,10 +443,11 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000       0x40
+.debug_ranges   0x00000000       0x58
  *(.debug_ranges)
- .debug_ranges  0x00000000       0x30 drivers/led.o
- .debug_ranges  0x00000030       0x10 main.o
+ .debug_ranges  0x00000000       0x18 drivers/button.o
+ .debug_ranges  0x00000018       0x30 drivers/led.o
+ .debug_ranges  0x00000048       0x10 main.o
 
 .debug_macro
  *(.debug_macro)

@@ -8,15 +8,24 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "drivers/led.h"
+#include "drivers/button.h"
+
 
 int main(void)
 {
 	Led_Init();
-    /* Replace with your application code */
+	Button_Init();
+	
     while (1) 
     {
-		Led_Blink(3);
-		_delay_ms(1000);
+		if(Button_IsPressed())
+		{
+			Led_On();
+		}
+		else
+		{
+			Led_Off();
+		}
     }
 }
 

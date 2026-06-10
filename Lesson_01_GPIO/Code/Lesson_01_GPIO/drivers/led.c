@@ -7,12 +7,12 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "led.h"
-
-#define LED_PIN PB0
+#include "../config/config.h"
 
 void Led_Init(void)
 {
 	DDRB |= (1 << LED_PIN);
+	PORTB &= ~(1 << LED_PIN);
 }
 
 void Led_On(void)
