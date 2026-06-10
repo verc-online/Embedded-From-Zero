@@ -1,0 +1,168 @@
+
+Lesson_01_GPIO.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000096  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  000000ea  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  000000ea  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000011c  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000060  00000000  00000000  00000158  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   00000797  00000000  00000000  000001b8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 00000645  00000000  00000000  0000094f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   000003e5  00000000  00000000  00000f94  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000094  00000000  00000000  0000137c  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    00000360  00000000  00000000  00001410  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    0000010a  00000000  00000000  00001770  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000040  00000000  00000000  0000187a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	12 c0       	rjmp	.+36     	; 0x26 <__ctors_end>
+   2:	19 c0       	rjmp	.+50     	; 0x36 <__bad_interrupt>
+   4:	18 c0       	rjmp	.+48     	; 0x36 <__bad_interrupt>
+   6:	17 c0       	rjmp	.+46     	; 0x36 <__bad_interrupt>
+   8:	16 c0       	rjmp	.+44     	; 0x36 <__bad_interrupt>
+   a:	15 c0       	rjmp	.+42     	; 0x36 <__bad_interrupt>
+   c:	14 c0       	rjmp	.+40     	; 0x36 <__bad_interrupt>
+   e:	13 c0       	rjmp	.+38     	; 0x36 <__bad_interrupt>
+  10:	12 c0       	rjmp	.+36     	; 0x36 <__bad_interrupt>
+  12:	11 c0       	rjmp	.+34     	; 0x36 <__bad_interrupt>
+  14:	10 c0       	rjmp	.+32     	; 0x36 <__bad_interrupt>
+  16:	0f c0       	rjmp	.+30     	; 0x36 <__bad_interrupt>
+  18:	0e c0       	rjmp	.+28     	; 0x36 <__bad_interrupt>
+  1a:	0d c0       	rjmp	.+26     	; 0x36 <__bad_interrupt>
+  1c:	0c c0       	rjmp	.+24     	; 0x36 <__bad_interrupt>
+  1e:	0b c0       	rjmp	.+22     	; 0x36 <__bad_interrupt>
+  20:	0a c0       	rjmp	.+20     	; 0x36 <__bad_interrupt>
+  22:	09 c0       	rjmp	.+18     	; 0x36 <__bad_interrupt>
+  24:	08 c0       	rjmp	.+16     	; 0x36 <__bad_interrupt>
+
+00000026 <__ctors_end>:
+  26:	11 24       	eor	r1, r1
+  28:	1f be       	out	0x3f, r1	; 63
+  2a:	cf e5       	ldi	r28, 0x5F	; 95
+  2c:	d4 e0       	ldi	r29, 0x04	; 4
+  2e:	de bf       	out	0x3e, r29	; 62
+  30:	cd bf       	out	0x3d, r28	; 61
+  32:	22 d0       	rcall	.+68     	; 0x78 <main>
+  34:	2e c0       	rjmp	.+92     	; 0x92 <_exit>
+
+00000036 <__bad_interrupt>:
+  36:	e4 cf       	rjmp	.-56     	; 0x0 <__vectors>
+
+00000038 <Led_Init>:
+	PORTB &= ~(1 << LED_PIN);
+}
+
+void Led_Toggle()
+{
+	PORTB ^= (1 << LED_PIN);
+  38:	b8 9a       	sbi	0x17, 0	; 23
+  3a:	08 95       	ret
+
+0000003c <Led_On>:
+  3c:	c0 9a       	sbi	0x18, 0	; 24
+  3e:	08 95       	ret
+
+00000040 <Led_Off>:
+  40:	c0 98       	cbi	0x18, 0	; 24
+  42:	08 95       	ret
+
+00000044 <Led_Blink>:
+}
+
+void Led_Blink(uint8_t count)
+{
+  44:	cf 93       	push	r28
+  46:	df 93       	push	r29
+	for (uint8_t i = 0; i < count; i++)
+  48:	88 23       	and	r24, r24
+  4a:	99 f0       	breq	.+38     	; 0x72 <Led_Blink+0x2e>
+  4c:	d8 2f       	mov	r29, r24
+  4e:	c0 e0       	ldi	r28, 0x00	; 0
+	{
+		Led_On();
+  50:	f5 df       	rcall	.-22     	; 0x3c <Led_On>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  52:	8f e4       	ldi	r24, 0x4F	; 79
+  54:	93 ec       	ldi	r25, 0xC3	; 195
+  56:	01 97       	sbiw	r24, 0x01	; 1
+  58:	f1 f7       	brne	.-4      	; 0x56 <Led_Blink+0x12>
+  5a:	00 c0       	rjmp	.+0      	; 0x5c <Led_Blink+0x18>
+  5c:	00 00       	nop
+		_delay_ms(200);
+		Led_Off();
+  5e:	f0 df       	rcall	.-32     	; 0x40 <Led_Off>
+  60:	8f e4       	ldi	r24, 0x4F	; 79
+  62:	93 ec       	ldi	r25, 0xC3	; 195
+  64:	01 97       	sbiw	r24, 0x01	; 1
+  66:	f1 f7       	brne	.-4      	; 0x64 <Led_Blink+0x20>
+  68:	00 c0       	rjmp	.+0      	; 0x6a <Led_Blink+0x26>
+  6a:	00 00       	nop
+	PORTB ^= (1 << LED_PIN);
+}
+
+void Led_Blink(uint8_t count)
+{
+	for (uint8_t i = 0; i < count; i++)
+  6c:	cf 5f       	subi	r28, 0xFF	; 255
+  6e:	dc 13       	cpse	r29, r28
+  70:	ef cf       	rjmp	.-34     	; 0x50 <Led_Blink+0xc>
+		Led_On();
+		_delay_ms(200);
+		Led_Off();
+		_delay_ms(200);
+	}
+  72:	df 91       	pop	r29
+  74:	cf 91       	pop	r28
+  76:	08 95       	ret
+
+00000078 <main>:
+#include <util/delay.h>
+#include "drivers/led.h"
+
+int main(void)
+{
+	Led_Init();
+  78:	df df       	rcall	.-66     	; 0x38 <Led_Init>
+    /* Replace with your application code */
+    while (1) 
+    {
+		Led_Blink(3);
+  7a:	83 e0       	ldi	r24, 0x03	; 3
+  7c:	e3 df       	rcall	.-58     	; 0x44 <Led_Blink>
+  7e:	2f e3       	ldi	r18, 0x3F	; 63
+  80:	8d e0       	ldi	r24, 0x0D	; 13
+  82:	93 e0       	ldi	r25, 0x03	; 3
+  84:	21 50       	subi	r18, 0x01	; 1
+  86:	80 40       	sbci	r24, 0x00	; 0
+  88:	90 40       	sbci	r25, 0x00	; 0
+  8a:	e1 f7       	brne	.-8      	; 0x84 <main+0xc>
+  8c:	00 c0       	rjmp	.+0      	; 0x8e <main+0x16>
+  8e:	00 00       	nop
+  90:	f4 cf       	rjmp	.-24     	; 0x7a <main+0x2>
+
+00000092 <_exit>:
+  92:	f8 94       	cli
+
+00000094 <__stop_program>:
+  94:	ff cf       	rjmp	.-2      	; 0x94 <__stop_program>
