@@ -22,3 +22,6 @@
 #User Specific Files
 *.atsuo
 
+# Proteus backups
+*.pdsbak
+*.bak
