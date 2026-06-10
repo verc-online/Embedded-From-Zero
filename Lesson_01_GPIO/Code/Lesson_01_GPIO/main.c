@@ -15,17 +15,18 @@ int main(void)
 {
 	Led_Init();
 	Button_Init();
+	bool previousState = false;
 	
     while (1) 
     {
-		if(Button_IsPressed())
+		bool currentState = Button_IsPressed();
+		
+		if((previousState == false) && (currentState == true))
 		{
-			Led_On();
+			Led_Toggle();
 		}
-		else
-		{
-			Led_Off();
-		}
+		
+		previousState = currentState;
     }
 }
 

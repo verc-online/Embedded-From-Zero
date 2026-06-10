@@ -3,29 +3,29 @@ Lesson_01_GPIO.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         00000070  00000000  00000000  00000054  2**1
+  0 .text         0000007a  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  000000c4  2**0
+  1 .data         00000000  00800060  00800060  000000ce  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  000000c4  2**0
+  2 .comment      00000030  00000000  00000000  000000ce  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  000000f4  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000100  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000088  00000000  00000000  00000130  2**0
+  4 .debug_aranges 00000088  00000000  00000000  0000013c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   000007f1  00000000  00000000  000001b8  2**0
+  5 .debug_info   0000080e  00000000  00000000  000001c4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 0000061b  00000000  00000000  000009a9  2**0
+  6 .debug_abbrev 00000635  00000000  00000000  000009d2  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000003fb  00000000  00000000  00000fc4  2**0
+  7 .debug_line   00000413  00000000  00000000  00001007  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  000000c8  00000000  00000000  000013c0  2**2
+  8 .debug_frame  000000c8  00000000  00000000  0000141c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000397  00000000  00000000  00001488  2**0
+  9 .debug_str    000003b2  00000000  00000000  000014e4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000010a  00000000  00000000  0000181f  2**0
+ 10 .debug_loc    0000015e  00000000  00000000  00001896  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000058  00000000  00000000  00001929  2**0
+ 11 .debug_ranges 00000058  00000000  00000000  000019f4  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -58,8 +58,8 @@ Disassembly of section .text:
   2c:	d4 e0       	ldi	r29, 0x04	; 4
   2e:	de bf       	out	0x3e, r29	; 62
   30:	cd bf       	out	0x3d, r28	; 61
-  32:	13 d0       	rcall	.+38     	; 0x5a <main>
-  34:	1b c0       	rjmp	.+54     	; 0x6c <_exit>
+  32:	14 d0       	rcall	.+40     	; 0x5c <main>
+  34:	20 c0       	rjmp	.+64     	; 0x76 <_exit>
 
 00000036 <__bad_interrupt>:
   36:	e4 cf       	rjmp	.-56     	; 0x0 <__vectors>
@@ -94,65 +94,69 @@ bool Button_IsPressed(void)
   4a:	08 95       	ret
 
 0000004c <Led_Init>:
-#include "led.h"
-#include "../config/config.h"
-
-void Led_Init(void)
-{
-	DDRB |= (1 << LED_PIN);
-  4c:	b8 9a       	sbi	0x17, 0	; 23
-	PORTB &= ~(1 << LED_PIN);
-  4e:	c0 98       	cbi	0x18, 0	; 24
-  50:	08 95       	ret
-
-00000052 <Led_On>:
-}
-
-void Led_On(void)
-{
 	PORTB |= (1 << LED_PIN);
-  52:	c0 9a       	sbi	0x18, 0	; 24
-  54:	08 95       	ret
-
-00000056 <Led_Off>:
 }
 
 void Led_Off(void)
 {
 	PORTB &= ~(1 << LED_PIN);
-  56:	c0 98       	cbi	0x18, 0	; 24
-  58:	08 95       	ret
+  4c:	b8 9a       	sbi	0x17, 0	; 23
+  4e:	c0 98       	cbi	0x18, 0	; 24
+  50:	08 95       	ret
 
-0000005a <main>:
+00000052 <Led_Toggle>:
+}
+
+void Led_Toggle()
+{
+	PORTB ^= (1 << LED_PIN);
+  52:	98 b3       	in	r25, 0x18	; 24
+  54:	81 e0       	ldi	r24, 0x01	; 1
+  56:	89 27       	eor	r24, r25
+  58:	88 bb       	out	0x18, r24	; 24
+  5a:	08 95       	ret
+
+0000005c <main>:
 #include "drivers/button.h"
 
 
 int main(void)
 {
 	Led_Init();
-  5a:	f8 df       	rcall	.-16     	; 0x4c <Led_Init>
+  5c:	f7 df       	rcall	.-18     	; 0x4c <Led_Init>
 	Button_Init();
-  5c:	ed df       	rcall	.-38     	; 0x38 <Button_Init>
+  5e:	ec df       	rcall	.-40     	; 0x38 <Button_Init>
+	bool previousState = false;
+  60:	d0 e0       	ldi	r29, 0x00	; 0
+  62:	01 c0       	rjmp	.+2      	; 0x66 <main+0xa>
+#include "drivers/led.h"
+#include "drivers/button.h"
+
+
+int main(void)
+{
+  64:	dc 2f       	mov	r29, r28
+	Button_Init();
+	bool previousState = false;
 	
     while (1) 
     {
-		if(Button_IsPressed())
-  5e:	ef df       	rcall	.-34     	; 0x3e <Button_IsPressed>
-  60:	88 23       	and	r24, r24
-  62:	11 f0       	breq	.+4      	; 0x68 <main+0xe>
+		bool currentState = Button_IsPressed();
+  66:	eb df       	rcall	.-42     	; 0x3e <Button_IsPressed>
+  68:	c8 2f       	mov	r28, r24
+		
+		if((previousState == false) && (currentState == true))
+  6a:	d1 11       	cpse	r29, r1
+  6c:	fb cf       	rjmp	.-10     	; 0x64 <main+0x8>
+  6e:	88 23       	and	r24, r24
+  70:	c9 f3       	breq	.-14     	; 0x64 <main+0x8>
 		{
-			Led_On();
-  64:	f6 df       	rcall	.-20     	; 0x52 <Led_On>
-  66:	fb cf       	rjmp	.-10     	; 0x5e <main+0x4>
-		}
-		else
-		{
-			Led_Off();
-  68:	f6 df       	rcall	.-20     	; 0x56 <Led_Off>
-  6a:	f9 cf       	rjmp	.-14     	; 0x5e <main+0x4>
+			Led_Toggle();
+  72:	ef df       	rcall	.-34     	; 0x52 <Led_Toggle>
+  74:	f7 cf       	rjmp	.-18     	; 0x64 <main+0x8>
 
-0000006c <_exit>:
-  6c:	f8 94       	cli
+00000076 <_exit>:
+  76:	f8 94       	cli
 
-0000006e <__stop_program>:
-  6e:	ff cf       	rjmp	.-2      	; 0x6e <__stop_program>
+00000078 <__stop_program>:
+  78:	ff cf       	rjmp	.-2      	; 0x78 <__stop_program>
