@@ -7,22 +7,23 @@
 #include <stdint.h>
 #include "feeder.h"
 #include "../drivers/led.h"
+#include "../drivers/timer.h"
 
 static FeederState feederState = FEEDER_IDLE;
-static uint16_t processCounter = 0;
+static uint32_t lastBlinkTime  = 0;
 static uint8_t blinkCount = 0;
 
 void Feeder_Init(void)
 {
 	feederState = FEEDER_IDLE;
-	processCounter = 0;
+	lastBlinkTime = 0;
 	blinkCount = 0;
 }
 void Feeder_Request(void)
 {
 	if (feederState != FEEDER_IDLE) return;
 	feederState = FEEDER_FEEDING;
-	processCounter = 0;
+	lastBlinkTime = Timer_GetTicks();
 	blinkCount = 0;
 }
 
@@ -32,11 +33,10 @@ void Feeder_Process(void)
 	
 	if(feederState == FEEDER_FEEDING)
 	{
-		processCounter++;
-		if (processCounter >= 5000)
+		if (Timer_HasElapsed(lastBlinkTime, 30))
 		{
 			Led_Toggle();
-			processCounter = 0;
+			lastBlinkTime = Timer_GetTicks();
 			blinkCount++;
 		}
 		

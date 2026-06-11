@@ -141,6 +141,12 @@
     <Compile Include="drivers\led.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="drivers\timer.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="drivers\timer.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>

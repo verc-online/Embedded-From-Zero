@@ -9,12 +9,16 @@
 #include <util/delay.h>
 #include "drivers/led.h"
 #include "drivers/button.h"
+#include "drivers/timer.h"
 #include "app/feeder.h"
 
 int main(void)
 {
 	Led_Init();
 	Button_Init();
+	Timer_Init();
+	Feeder_Init();
+	
 	bool previousState = false;
 	
     while (1) 
@@ -25,7 +29,7 @@ int main(void)
 		{
 			Feeder_Request();
 		}
-		
+		previousState = currentState;
 		Feeder_Process();
     }
 }
