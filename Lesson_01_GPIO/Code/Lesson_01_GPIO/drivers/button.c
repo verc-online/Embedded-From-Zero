@@ -27,13 +27,12 @@ bool Button_IsPressed(void)
 
 bool Button_IsPressedDebounced(void)
 {
-	if (!(PIND & (1 << BUTTON_PIN)))
+	if (!Button_IsPressed())
 	{
-		_delay_ms(20);
-		if (!(PIND & (1 << BUTTON_PIN)))
-		{
-			return true;
-		}
+		return false;
 	}
-	return false;
+
+	_delay_ms(20);
+
+	return Button_IsPressed();
 }

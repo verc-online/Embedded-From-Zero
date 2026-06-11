@@ -34,11 +34,13 @@ LINKER_SCRIPT_DEP:=
 # Every subdirectory with source files must be described here
 SUBDIRS :=  \
 ../drivers \
-../config
+../config \
+../app
 
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
+../app/feeder.c \
 ../drivers/button.c \
 ../drivers/led.c \
 ../main.c
@@ -51,21 +53,25 @@ ASM_SRCS +=
 
 
 OBJS +=  \
+app/feeder.o \
 drivers/button.o \
 drivers/led.o \
 main.o
 
 OBJS_AS_ARGS +=  \
+app/feeder.o \
 drivers/button.o \
 drivers/led.o \
 main.o
 
 C_DEPS +=  \
+app/feeder.d \
 drivers/button.d \
 drivers/led.d \
 main.d
 
 C_DEPS_AS_ARGS +=  \
+app/feeder.d \
 drivers/button.d \
 drivers/led.d \
 main.d
@@ -84,6 +90,13 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+app/feeder.o: ../app/feeder.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega8 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\gcc\dev\atmega8" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 drivers/button.o: ../drivers/button.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0

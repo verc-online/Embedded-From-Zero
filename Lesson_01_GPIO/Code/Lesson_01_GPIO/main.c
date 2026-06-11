@@ -9,7 +9,7 @@
 #include <util/delay.h>
 #include "drivers/led.h"
 #include "drivers/button.h"
-
+#include "app/feeder.h"
 
 int main(void)
 {
@@ -23,7 +23,7 @@ int main(void)
 		
 		if((previousState == false) && (currentState == true))
 		{
-			Led_Toggle();
+			Feeder_Request();
 		}
 		
 		previousState = currentState;

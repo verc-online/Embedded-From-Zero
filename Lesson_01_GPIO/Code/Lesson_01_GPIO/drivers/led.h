@@ -8,6 +8,7 @@
 
 #ifndef LED_H_
 #define LED_H_
+#include <stdint.h>
 
 void Led_Init(void);
 

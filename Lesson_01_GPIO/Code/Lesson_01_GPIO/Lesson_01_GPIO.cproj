@@ -108,6 +108,12 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="app\feeder.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="app\feeder.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="config\config.h">
       <SubType>compile</SubType>
     </Compile>
@@ -130,6 +136,7 @@
   <ItemGroup>
     <Folder Include="drivers" />
     <Folder Include="config" />
+    <Folder Include="app" />
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>
