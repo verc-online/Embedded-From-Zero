@@ -9,8 +9,8 @@
 #include <stdint.h>
 #include "servo.h"
 
-#define  SERVO_MIN_TICKS 125
-#define  SERVO_CENTER_TICKS 188
+#define SERVO_MIN_TICKS 125
+#define SERVO_CENTER_TICKS 188
 #define SERVO_MAX_TICKS 250
 #define SERVO_PERIOD_TICKS 2500
 

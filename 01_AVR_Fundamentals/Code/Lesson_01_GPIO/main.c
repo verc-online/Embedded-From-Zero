@@ -6,7 +6,6 @@
  */ 
 #include "config/config.h"
 #include <avr/io.h>
-#include <util/delay.h>
 #include "drivers/led.h"
 #include "drivers/button.h"
 #include "drivers/timer.h"
@@ -18,30 +17,23 @@ int main(void)
 	Led_Init();
 	Button_Init();
 	Timer_Init();
-	Feeder_Init();
 	Servo_Init();
+	Feeder_Init();
+
 	
 	bool previousState = false;
 	
     while (1) 
     {
-// 		bool currentState = Button_IsPressedDebounced();
-// 		
-// 		if((previousState == false) && (currentState == true))
-// 		{
-// 			Feeder_Request();
-// 		}
-// 		previousState = currentState;
-// 		Feeder_Process();
+		bool currentState = Button_IsPressedDebounced();
+		
+		if((previousState == false) && (currentState == true))
+		{
+			Feeder_Request();
+		}
+		previousState = currentState;
+		Feeder_Process();
 
-		Servo_SetAngle(0);
-		_delay_ms(1000);
-
-		Servo_SetAngle(90);
-		_delay_ms(1000);
-
-		Servo_SetAngle(180);
-		_delay_ms(1000);
     }
 }
 

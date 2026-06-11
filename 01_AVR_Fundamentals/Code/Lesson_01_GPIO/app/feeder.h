@@ -12,10 +12,18 @@
 
 typedef enum
 {
-	FEEDER_IDLE,      // ожидание
-	FEEDER_FEEDING,   // выдача корма
-	FEEDER_NO_FOOD,   // нет корма
-	FEEDER_ERROR     // ошибка
+	FEEDER_IDLE,
+
+	FEEDER_OPENING,
+
+	FEEDER_WAITING,
+
+	FEEDER_CLOSING,
+
+	FEEDER_NO_FOOD,
+
+	FEEDER_ERROR
+
 } FeederState;
 
 

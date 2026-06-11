@@ -4,11 +4,12 @@
  * Created: 10.06.2026 11:19:58
  *  Author: HP
  */ 
+#include "../config/config.h"
 #include <avr/io.h>
 #include <util/delay.h>
 
 #include "led.h"
-#include "../config/config.h"
+
 
 void Led_Init(void)
 {

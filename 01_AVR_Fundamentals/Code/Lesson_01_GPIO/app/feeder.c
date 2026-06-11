@@ -5,46 +5,45 @@
 *  Author: HP
 */
 #include <stdint.h>
-#include "feeder.h"
-#include "../drivers/led.h"
+#include "../config/config.h"
+#include "../app/feeder.h"
 #include "../drivers/timer.h"
+#include "../drivers/servo.h"
 
 static FeederState feederState = FEEDER_IDLE;
-static uint32_t lastBlinkTime  = 0;
-static uint8_t blinkCount = 0;
+static uint32_t stateStartTime = 0;
 
 void Feeder_Init(void)
 {
 	feederState = FEEDER_IDLE;
-	lastBlinkTime = 0;
-	blinkCount = 0;
+	Servo_SetAngle(FEEDER_GATE_CLOSED_ANGLE);
 }
 void Feeder_Request(void)
 {
 	if (feederState != FEEDER_IDLE) return;
-	feederState = FEEDER_FEEDING;
-	lastBlinkTime = Timer_GetTicks();
-	blinkCount = 0;
+	
+	Servo_SetAngle(FEEDER_GATE_OPEN_ANGLE);
+
+	stateStartTime = Timer_GetTicks();
+	
+	feederState = FEEDER_WAITING;
 }
 
 void Feeder_Process(void)
 {
-	if (feederState == FEEDER_IDLE) return;
-	
-	if(feederState == FEEDER_FEEDING)
+	switch(feederState)
 	{
-		if (Timer_HasElapsed(lastBlinkTime, 30))
-		{
-			Led_Toggle();
-			lastBlinkTime = Timer_GetTicks();
-			blinkCount++;
-		}
+		case FEEDER_IDLE: break;
 		
-		if(blinkCount >= 10)
+		case FEEDER_WAITING:
+		if(Timer_HasElapsed(stateStartTime, 120))
 		{
-			Led_Off();
+			Servo_SetAngle(FEEDER_GATE_CLOSED_ANGLE);
 			feederState = FEEDER_IDLE;
 		}
+		break;
+		
+		default: break;
 	}
 }
 
