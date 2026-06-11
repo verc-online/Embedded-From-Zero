@@ -26,7 +26,7 @@ int main(void)
 			Feeder_Request();
 		}
 		
-		previousState = currentState;
+		Feeder_Process();
     }
 }
 
