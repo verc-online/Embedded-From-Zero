@@ -11,6 +11,7 @@
 #include "drivers/button.h"
 #include "drivers/timer.h"
 #include "app/feeder.h"
+#include "drivers/servo.h"
 
 int main(void)
 {
@@ -18,19 +19,29 @@ int main(void)
 	Button_Init();
 	Timer_Init();
 	Feeder_Init();
+	Servo_Init();
 	
 	bool previousState = false;
 	
     while (1) 
     {
-		bool currentState = Button_IsPressedDebounced();
-		
-		if((previousState == false) && (currentState == true))
-		{
-			Feeder_Request();
-		}
-		previousState = currentState;
-		Feeder_Process();
+// 		bool currentState = Button_IsPressedDebounced();
+// 		
+// 		if((previousState == false) && (currentState == true))
+// 		{
+// 			Feeder_Request();
+// 		}
+// 		previousState = currentState;
+// 		Feeder_Process();
+
+		Servo_SetAngle(0);
+		_delay_ms(1000);
+
+		Servo_SetAngle(90);
+		_delay_ms(1000);
+
+		Servo_SetAngle(180);
+		_delay_ms(1000);
     }
 }
 
