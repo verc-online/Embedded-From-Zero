@@ -19,7 +19,7 @@ int main(void)
 	
     while (1) 
     {
-		bool currentState = Button_IsPressed();
+		bool currentState = Button_IsPressedDebounced();
 		
 		if((previousState == false) && (currentState == true))
 		{

@@ -3,29 +3,29 @@ Lesson_01_GPIO.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         0000007a  00000000  00000000  00000054  2**1
+  0 .text         0000008e  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .data         00000000  00800060  00800060  000000ce  2**0
+  1 .data         00000000  00800060  00800060  000000e2  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  2 .comment      00000030  00000000  00000000  000000ce  2**0
+  2 .comment      00000030  00000000  00000000  000000e2  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000100  2**2
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000114  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000088  00000000  00000000  0000013c  2**0
+  4 .debug_aranges 00000090  00000000  00000000  00000150  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   0000080e  00000000  00000000  000001c4  2**0
+  5 .debug_info   000008a9  00000000  00000000  000001e0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000635  00000000  00000000  000009d2  2**0
+  6 .debug_abbrev 000006b5  00000000  00000000  00000a89  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000413  00000000  00000000  00001007  2**0
+  7 .debug_line   000004ad  00000000  00000000  0000113e  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  000000c8  00000000  00000000  0000141c  2**2
+  8 .debug_frame  000000d8  00000000  00000000  000015ec  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    000003b2  00000000  00000000  000014e4  2**0
+  9 .debug_str    000003cc  00000000  00000000  000016c4  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000015e  00000000  00000000  00001896  2**0
+ 10 .debug_loc    000001a4  00000000  00000000  00001a90  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000058  00000000  00000000  000019f4  2**0
+ 11 .debug_ranges 00000060  00000000  00000000  00001c34  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -58,105 +58,125 @@ Disassembly of section .text:
   2c:	d4 e0       	ldi	r29, 0x04	; 4
   2e:	de bf       	out	0x3e, r29	; 62
   30:	cd bf       	out	0x3d, r28	; 61
-  32:	14 d0       	rcall	.+40     	; 0x5c <main>
-  34:	20 c0       	rjmp	.+64     	; 0x76 <_exit>
+  32:	1e d0       	rcall	.+60     	; 0x70 <main>
+  34:	2a c0       	rjmp	.+84     	; 0x8a <_exit>
 
 00000036 <__bad_interrupt>:
   36:	e4 cf       	rjmp	.-56     	; 0x0 <__vectors>
 
 00000038 <Button_Init>:
-
-
-void Button_Init(void)
-{
-	// Настраиваем пин кнопки как вход
-	DDRD &= ~(1 << BUTTON_PIN);
-  38:	8a 98       	cbi	0x11, 2	; 17
-	
-	//Включаем внутреннуюю подтяжку Pull-Up
-	PORTD |= (1 << BUTTON_PIN);
-  3a:	92 9a       	sbi	0x12, 2	; 18
-  3c:	08 95       	ret
-
-0000003e <Button_IsPressed>:
 }
 bool Button_IsPressed(void)
 {
 	// Кнопка подключена к земле, поэтому при нажатии читаем 0
 	return !(PIND &(1 << BUTTON_PIN));
-  3e:	80 b3       	in	r24, 0x10	; 16
-  40:	82 fb       	bst	r24, 2
-  42:	88 27       	eor	r24, r24
-  44:	80 f9       	bld	r24, 0
 }
-  46:	91 e0       	ldi	r25, 0x01	; 1
-  48:	89 27       	eor	r24, r25
-  4a:	08 95       	ret
+  38:	8a 98       	cbi	0x11, 2	; 17
+  3a:	92 9a       	sbi	0x12, 2	; 18
+  3c:	08 95       	ret
 
-0000004c <Led_Init>:
+0000003e <Button_IsPressedDebounced>:
+
+bool Button_IsPressedDebounced(void)
+{
+	if (!(PIND & (1 << BUTTON_PIN)))
+  3e:	82 99       	sbic	0x10, 2	; 16
+  40:	0d c0       	rjmp	.+26     	; 0x5c <__SREG__+0x1d>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  42:	87 e8       	ldi	r24, 0x87	; 135
+  44:	93 e1       	ldi	r25, 0x13	; 19
+  46:	01 97       	sbiw	r24, 0x01	; 1
+  48:	f1 f7       	brne	.-4      	; 0x46 <__SREG__+0x7>
+  4a:	00 c0       	rjmp	.+0      	; 0x4c <__SREG__+0xd>
+  4c:	00 00       	nop
+	{
+		_delay_ms(20);
+		if (!(PIND & (1 << BUTTON_PIN)))
+  4e:	80 b3       	in	r24, 0x10	; 16
+  50:	82 fb       	bst	r24, 2
+  52:	99 27       	eor	r25, r25
+  54:	90 f9       	bld	r25, 0
+  56:	81 e0       	ldi	r24, 0x01	; 1
+  58:	89 27       	eor	r24, r25
+  5a:	08 95       	ret
+		{
+			return true;
+		}
+	}
+	return false;
+  5c:	80 e0       	ldi	r24, 0x00	; 0
+}
+  5e:	08 95       	ret
+
+00000060 <Led_Init>:
 	PORTB |= (1 << LED_PIN);
 }
 
 void Led_Off(void)
 {
 	PORTB &= ~(1 << LED_PIN);
-  4c:	b8 9a       	sbi	0x17, 0	; 23
-  4e:	c0 98       	cbi	0x18, 0	; 24
-  50:	08 95       	ret
+  60:	b8 9a       	sbi	0x17, 0	; 23
+  62:	c0 98       	cbi	0x18, 0	; 24
+  64:	08 95       	ret
 
-00000052 <Led_Toggle>:
+00000066 <Led_Toggle>:
 }
 
 void Led_Toggle()
 {
 	PORTB ^= (1 << LED_PIN);
-  52:	98 b3       	in	r25, 0x18	; 24
-  54:	81 e0       	ldi	r24, 0x01	; 1
-  56:	89 27       	eor	r24, r25
-  58:	88 bb       	out	0x18, r24	; 24
-  5a:	08 95       	ret
+  66:	98 b3       	in	r25, 0x18	; 24
+  68:	81 e0       	ldi	r24, 0x01	; 1
+  6a:	89 27       	eor	r24, r25
+  6c:	88 bb       	out	0x18, r24	; 24
+  6e:	08 95       	ret
 
-0000005c <main>:
+00000070 <main>:
 #include "drivers/button.h"
 
 
 int main(void)
 {
 	Led_Init();
-  5c:	f7 df       	rcall	.-18     	; 0x4c <Led_Init>
+  70:	f7 df       	rcall	.-18     	; 0x60 <Led_Init>
 	Button_Init();
-  5e:	ec df       	rcall	.-40     	; 0x38 <Button_Init>
+  72:	e2 df       	rcall	.-60     	; 0x38 <Button_Init>
 	bool previousState = false;
-  60:	d0 e0       	ldi	r29, 0x00	; 0
-  62:	01 c0       	rjmp	.+2      	; 0x66 <main+0xa>
+  74:	d0 e0       	ldi	r29, 0x00	; 0
+  76:	01 c0       	rjmp	.+2      	; 0x7a <main+0xa>
 #include "drivers/led.h"
 #include "drivers/button.h"
 
 
 int main(void)
 {
-  64:	dc 2f       	mov	r29, r28
+  78:	dc 2f       	mov	r29, r28
 	Button_Init();
 	bool previousState = false;
 	
     while (1) 
     {
-		bool currentState = Button_IsPressed();
-  66:	eb df       	rcall	.-42     	; 0x3e <Button_IsPressed>
-  68:	c8 2f       	mov	r28, r24
+		bool currentState = Button_IsPressedDebounced();
+  7a:	e1 df       	rcall	.-62     	; 0x3e <Button_IsPressedDebounced>
+  7c:	c8 2f       	mov	r28, r24
 		
 		if((previousState == false) && (currentState == true))
-  6a:	d1 11       	cpse	r29, r1
-  6c:	fb cf       	rjmp	.-10     	; 0x64 <main+0x8>
-  6e:	88 23       	and	r24, r24
-  70:	c9 f3       	breq	.-14     	; 0x64 <main+0x8>
+  7e:	d1 11       	cpse	r29, r1
+  80:	fb cf       	rjmp	.-10     	; 0x78 <main+0x8>
+  82:	88 23       	and	r24, r24
+  84:	c9 f3       	breq	.-14     	; 0x78 <main+0x8>
 		{
 			Led_Toggle();
-  72:	ef df       	rcall	.-34     	; 0x52 <Led_Toggle>
-  74:	f7 cf       	rjmp	.-18     	; 0x64 <main+0x8>
+  86:	ef df       	rcall	.-34     	; 0x66 <Led_Toggle>
+  88:	f7 cf       	rjmp	.-18     	; 0x78 <main+0x8>
 
-00000076 <_exit>:
-  76:	f8 94       	cli
+0000008a <_exit>:
+  8a:	f8 94       	cli
 
-00000078 <__stop_program>:
-  78:	ff cf       	rjmp	.-2      	; 0x78 <__stop_program>
+0000008c <__stop_program>:
+  8c:	ff cf       	rjmp	.-2      	; 0x8c <__stop_program>

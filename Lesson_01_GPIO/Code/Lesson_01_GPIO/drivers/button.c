@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include "button.h"
 #include "../config/config.h"
-
+#include <util/delay.h>
 
 void Button_Init(void)
 {
@@ -25,3 +25,15 @@ bool Button_IsPressed(void)
 	return !(PIND &(1 << BUTTON_PIN));
 }
 
+bool Button_IsPressedDebounced(void)
+{
+	if (!(PIND & (1 << BUTTON_PIN)))
+	{
+		_delay_ms(20);
+		if (!(PIND & (1 << BUTTON_PIN)))
+		{
+			return true;
+		}
+	}
+	return false;
+}

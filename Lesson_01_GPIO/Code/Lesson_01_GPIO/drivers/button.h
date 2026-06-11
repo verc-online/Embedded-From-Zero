@@ -13,5 +13,6 @@
 
 void Button_Init(void);
 bool Button_IsPressed(void);
+bool Button_IsPressedDebounced(void);
 
 #endif /* BUTTON_H_ */
