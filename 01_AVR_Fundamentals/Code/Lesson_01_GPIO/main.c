@@ -11,8 +11,9 @@
 #include "drivers/timer.h"
 #include "app/feeder.h"
 #include "drivers/servo.h"
-#include "app/scheduler.h"
+#include "drivers/ds3231.h"
 #include "drivers/twi.h"
+#include "app/scheduler.h"
 
 int main(void)
 {

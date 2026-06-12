@@ -19,10 +19,6 @@ typedef struct
 	uint8_t seconds;
 } RtcTime;
 
-
-static uint8_t BcdToDecimal(uint8_t bcd);
-static uint8_t DecimalToBcd(uint8_t value);
-
 bool DS3231_ReadTime(RtcTime *time);
 bool DS3231_SetTime(const RtcTime *time);
 

@@ -8,8 +8,14 @@
 #include "scheduler.h"
 #include "feeder.h"
 #include "../drivers/timer.h"
+#include "../drivers/ds3231.h"
 
 #define  SCHEDULER_SECONDS_TICKS 61
+
+volatile uint8_t debugHours;
+volatile uint8_t debugMinutes;
+volatile uint8_t debugSeconds;
+volatile uint8_t debugRtcOk;
 
 typedef struct
 {
@@ -17,49 +23,20 @@ typedef struct
 	uint8_t minutes;
 } FeedingTime;
 
-static uint8_t hours = 7;
-static uint8_t minutes = 59;
-static uint8_t seconds = 50;
-
-static uint32_t lastSecondTime = 0;
+static uint8_t lastCheckedMinute;
 
 static FeedingTime feedingSchedule[] =
 {
-	{8, 0},
-	{20, 0}
+	{16, 24},
+	{16, 25}
 };
 
-static void Scheduler_UpdateTime (bool *minuteChanged)
-{
-	*minuteChanged = false;
-	
-	seconds++;
-	
-	if (seconds >= 60)
-	{
-		seconds = 0;
-		minutes++;
-		*minuteChanged = true;
-	}
-	
-	if (minutes >= 60)
-	{
-		minutes = 0;
-		hours++;
-	}
-	
-	if(hours >= 24)
-	{
-		hours = 0;
-	}
-}
-
-static void Scheduler_CheckFeedingTime(void)
+static void Scheduler_CheckFeedingTime(uint8_t currentHours, uint8_t currentMinutes)
 {
 	uint8_t scheduleCount = sizeof(feedingSchedule) / sizeof(feedingSchedule[0]);
 	for (uint8_t i = 0; i < scheduleCount; i++)
 	{
-		if((feedingSchedule[i].hours == hours) && (feedingSchedule[i].minutes == minutes))
+		if((feedingSchedule[i].hours == currentHours) && (feedingSchedule[i].minutes == currentMinutes))
 		{
 			Feeder_Request();
 			break;
@@ -69,25 +46,33 @@ static void Scheduler_CheckFeedingTime(void)
 
 void Scheduler_Init(void)
 {
-	hours = 7;
-	minutes = 59;
-	seconds = 50;
-	
-	lastSecondTime = Timer_GetTicks();
+	RtcTime currentTime;
+
+	if (DS3231_ReadTime(&currentTime))
+	{
+		lastCheckedMinute = currentTime.minutes;
+	}
+	else
+	{
+		lastCheckedMinute = 255;
+	}
 }
 
 void Scheduler_Process(void)
 {
-	if (!Timer_HasElapsed(lastSecondTime, SCHEDULER_SECONDS_TICKS))
+	RtcTime currentTime;
+
+	if (!DS3231_ReadTime(&currentTime))
 	{
 		return;
 	}
-	lastSecondTime = Timer_GetTicks();
-	bool minuteChanged = false;
-	Scheduler_UpdateTime(&minuteChanged);
-	
-	if(minuteChanged)
+
+	if (currentTime.minutes == lastCheckedMinute)
 	{
-		Scheduler_CheckFeedingTime();
+		return;
 	}
+
+	lastCheckedMinute = currentTime.minutes;
+
+	Scheduler_CheckFeedingTime(currentTime.hours, currentTime.minutes);
 }

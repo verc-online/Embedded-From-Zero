@@ -32,15 +32,18 @@ void TWI_Init(void)
 bool TWI_Start(void)
 {
 	TWCR = (1 << TWINT)
-	| (1<< TWSTA)
+	| (1 << TWSTA)
 	| (1 << TWEN);
+
 	while (!(TWCR & (1 << TWINT)))
 	{
 	}
-	
-	// TWSR 0x08 - означает :
-	// 0x08 = START condition has been transmitted
-	if (TWI_GetStatus() != 0x08)
+
+	uint8_t status = TWI_GetStatus();
+
+	// 0x08 = START condition transmitted
+	// 0x10 = Repeated START condition transmitted
+	if ((status != 0x08) && (status != 0x10))
 	{
 		return false;
 	}
