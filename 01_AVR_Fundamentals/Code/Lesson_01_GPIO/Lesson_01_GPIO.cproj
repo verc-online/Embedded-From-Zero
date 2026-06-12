@@ -126,6 +126,12 @@
     <Compile Include="app\feeder.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="app\scheduler.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="app\scheduler.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="config\config.h">
       <SubType>compile</SubType>
     </Compile>

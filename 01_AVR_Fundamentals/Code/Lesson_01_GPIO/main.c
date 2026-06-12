@@ -11,6 +11,7 @@
 #include "drivers/timer.h"
 #include "app/feeder.h"
 #include "drivers/servo.h"
+#include "app/scheduler.h"
 
 int main(void)
 {
@@ -19,7 +20,7 @@ int main(void)
 	Timer_Init();
 	Servo_Init();
 	Feeder_Init();
-
+	Scheduler_Init();
 	
 	bool previousState = false;
 	
@@ -32,6 +33,8 @@ int main(void)
 			Feeder_Request();
 		}
 		previousState = currentState;
+		
+		Scheduler_Process();
 		Feeder_Process();
 
     }
