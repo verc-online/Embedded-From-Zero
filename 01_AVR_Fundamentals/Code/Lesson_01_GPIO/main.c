@@ -12,6 +12,7 @@
 #include "app/feeder.h"
 #include "drivers/servo.h"
 #include "app/scheduler.h"
+#include "drivers/twi.h"
 
 int main(void)
 {
@@ -19,8 +20,10 @@ int main(void)
 	Button_Init();
 	Timer_Init();
 	Servo_Init();
+	TWI_Init();
 	Feeder_Init();
 	Scheduler_Init();
+
 	
 	bool previousState = false;
 	

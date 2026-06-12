@@ -159,6 +159,12 @@
     <Compile Include="drivers\timer.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="drivers\twi.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="drivers\twi.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
