@@ -14,6 +14,7 @@
 #include "drivers/ds3231.h"
 #include "drivers/twi.h"
 #include "app/scheduler.h"
+#include "drivers/uart.h"
 
 int main(void)
 {
@@ -22,12 +23,16 @@ int main(void)
 	Timer_Init();
 	Servo_Init();
 	TWI_Init();
+	UART_Init();
+	
 	Feeder_Init();
 	Scheduler_Init();
 
 	
 	bool previousState = false;
 	
+	UART_SendString("System Start\r\n");
+	UART_SendNumber(123);
     while (1) 
     {
 		bool currentState = Button_IsPressedDebounced();

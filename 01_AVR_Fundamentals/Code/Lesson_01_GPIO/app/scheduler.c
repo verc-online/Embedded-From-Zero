@@ -12,11 +12,6 @@
 
 #define  SCHEDULER_SECONDS_TICKS 61
 
-volatile uint8_t debugHours;
-volatile uint8_t debugMinutes;
-volatile uint8_t debugSeconds;
-volatile uint8_t debugRtcOk;
-
 typedef struct
 {
 	uint8_t hours;
@@ -27,8 +22,11 @@ static uint8_t lastCheckedMinute;
 
 static FeedingTime feedingSchedule[] =
 {
-	{16, 24},
-	{16, 25}
+	{16, 30},
+	{16, 31},
+	{16, 31},
+	{16, 32},
+	{16, 33}
 };
 
 static void Scheduler_CheckFeedingTime(uint8_t currentHours, uint8_t currentMinutes)
