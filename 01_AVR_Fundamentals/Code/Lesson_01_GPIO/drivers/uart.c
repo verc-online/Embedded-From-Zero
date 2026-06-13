@@ -69,3 +69,31 @@ void UART_SendNumber(uint16_t value)
 
 	UART_SendString(&buffer[index]);
 }
+
+void UART_SendNumber2(uint8_t value)
+{
+	if (value < 10)
+	{
+		UART_SendChar('0');
+	}
+	UART_SendNumber(value);
+}
+
+void UART_SendLine(const char *str)
+{
+	UART_SendString(str);
+	UART_SendString("\r\n");
+}
+
+void UART_SendTime(uint8_t hours,
+uint8_t minutes,
+uint8_t seconds)
+{
+	UART_SendNumber2(hours);
+	UART_SendChar(':');
+
+	UART_SendNumber2(minutes);
+	UART_SendChar(':');
+
+	UART_SendNumber2(seconds);
+}

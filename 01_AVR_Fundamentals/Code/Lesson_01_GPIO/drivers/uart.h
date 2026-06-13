@@ -12,6 +12,9 @@
 void UART_Init(void);
 void UART_SendChar(char c);
 void UART_SendString(const char *srt);
-void UART_SendNumber(uint16_t number);
+void UART_SendNumber(uint16_t value);
+void UART_SendLine(const char *str);
+void UART_SendNumber2(uint8_t value);
+void UART_SendTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
 
 #endif /* UART_H_ */

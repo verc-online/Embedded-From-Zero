@@ -31,8 +31,8 @@ int main(void)
 	
 	bool previousState = false;
 	
-	UART_SendString("System Start\r\n");
-	UART_SendNumber(123);
+	UART_SendLine("System Start");
+	
     while (1) 
     {
 		bool currentState = Button_IsPressedDebounced();
