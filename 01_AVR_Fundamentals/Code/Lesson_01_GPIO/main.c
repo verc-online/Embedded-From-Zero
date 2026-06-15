@@ -15,6 +15,8 @@
 #include "drivers/twi.h"
 #include "app/scheduler.h"
 #include "drivers/uart.h"
+#include "app/debug.h"
+#include "drivers/eeprom.h"
 
 int main(void)
 {
@@ -31,7 +33,16 @@ int main(void)
 	
 	bool previousState = false;
 	
-	UART_SendLine("System Start");
+	DEBUG_LOG("System start");
+	
+	
+	/*EEPROM_WriteByte(10, 123);*/
+
+	uint8_t value = EEPROM_ReadByte(10);
+
+	UART_SendString("EEPROM: ");
+	UART_SendNumber(value);
+	UART_SendString("\r\n");
 	
     while (1) 
     {
@@ -39,13 +50,13 @@ int main(void)
 		
 		if((previousState == false) && (currentState == true))
 		{
+			DEBUG_LOG("Scheduler match");
 			Feeder_Request();
 		}
 		previousState = currentState;
 		
 		Scheduler_Process();
 		Feeder_Process();
-
     }
 }
 
