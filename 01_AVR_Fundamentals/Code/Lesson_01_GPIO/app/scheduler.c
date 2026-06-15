@@ -9,14 +9,9 @@
 #include "feeder.h"
 #include "../drivers/timer.h"
 #include "../drivers/ds3231.h"
+#include "../drivers/eeprom.h"
 
 #define  SCHEDULER_SECONDS_TICKS 61
-
-typedef struct
-{
-	uint8_t hours;
-	uint8_t minutes;
-} FeedingTime;
 
 static uint8_t lastCheckedMinute;
 
@@ -28,6 +23,40 @@ static FeedingTime feedingSchedule[] =
 	{16, 32},
 	{16, 33}
 };
+
+// TODO: Вернуть static
+void Scheduler_SaveFeedingTime(uint16_t address,
+const FeedingTime *time)
+{
+	// Получаем указатель на первый элемент в нашем расписании
+	const uint8_t *ptr = (const uint8_t*)time;
+	
+	// Получаем размер нашей структуры расписания
+	for (uint8_t i = 0; i < sizeof(*time); i++)
+	{
+		// Сдвигаемся по регистру памяти на i элемент и получаем данные
+		EEPROM_UpdateByte(address + i, ptr[i]);
+		// Эта запись эквивалентна
+		// EEPROM_UpdateByte(address + i, *(ptr + i));
+		// Но компилятор делает это за нас 
+		// ptr[i] == *(ptr + i)
+		
+		// И эта запись эквивалентна
+		// EEPROM_UpdateByte(address + i, *ptr);
+		// ptr++;
+	}
+}
+
+// TODO: Вернуть static
+void Scheduler_LoadFeedingTime(uint16_t address,											FeedingTime *time)
+{
+	uint8_t *ptr = (uint8_t*)time;
+	for (uint8_t i = 0; i < sizeof(*time); i++)
+	{
+		ptr[i] = EEPROM_ReadByte(address + i);
+	}
+}
+
 
 static void Scheduler_CheckFeedingTime(uint8_t currentHours, uint8_t currentMinutes)
 {
@@ -41,6 +70,7 @@ static void Scheduler_CheckFeedingTime(uint8_t currentHours, uint8_t currentMinu
 		}
 	}
 }
+
 
 void Scheduler_Init(void)
 {

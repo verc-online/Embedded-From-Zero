@@ -35,14 +35,19 @@ int main(void)
 	
 	DEBUG_LOG("System start");
 	
-	
-	/*EEPROM_WriteByte(10, 123);*/
+	// TODO: Удалить и вернуть функциям static
+	FeedingTime testSave = {16, 30};
+	FeedingTime testLoad = {0, 0};
 
-	uint8_t value = EEPROM_ReadByte(10);
+	Scheduler_SaveFeedingTime(20, &testSave);
+	Scheduler_LoadFeedingTime(20, &testLoad);
 
-	UART_SendString("EEPROM: ");
-	UART_SendNumber(value);
+	UART_SendString("Loaded time: ");
+	UART_SendNumber2(testLoad.hours);
+	UART_SendChar(':');
+	UART_SendNumber2(testLoad.minutes);
 	UART_SendString("\r\n");
+	// =========================================
 	
     while (1) 
     {
