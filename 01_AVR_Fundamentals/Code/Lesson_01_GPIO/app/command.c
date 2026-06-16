@@ -1,11 +1,11 @@
 /*
- * command.c
- *
- * Created: 16.06.2026 20:40:03
- *  Author: HP
- */ 
+* command.c
+*
+* Created: 16.06.2026 20:40:03
+*  Author: HP
+*/
 #define COMMAND_BUFFER_SIZE 32
-
+#include <stdio.h>
 #include <string.h>
 #include "command.h"
 #include "../drivers/uart.h"
@@ -47,7 +47,32 @@ static void Command_Execute(const char *command)
 		Scheduler_PrintSchedule();
 		return;
 	}
+	if (strcmp(command, "help") == 0)
+	{
+		UART_SendLine("Available commands:");
+		UART_SendLine("help");
+		UART_SendLine("time");
+		UART_SendLine("show");
+		UART_SendLine("add HH MM");
+		return;
+	}
+	uint8_t hours;
+	uint8_t minutes;
 
+	if (sscanf(command, "add %hhu %hhu", &hours, &minutes) == 2)
+	{
+		if (Scheduler_AddFeedingTime(hours, minutes))
+		{
+			UART_SendLine("Feeding time added");
+		}
+		else
+		{
+			UART_SendLine("Failed to add feeding time");
+		}
+
+		return;
+	}
+	
 	UART_SendString("Unknown command: ");
 	UART_SendString(command);
 	UART_SendString("\r\n");

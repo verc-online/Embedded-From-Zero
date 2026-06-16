@@ -17,5 +17,6 @@ void Scheduler_Process(void);
 bool Scheduler_LoadSettings(void);
 bool Scheduler_SaveSettings(void);
 void Scheduler_PrintSchedule(void);
+bool Scheduler_AddFeedingTime(uint8_t hours, uint8_t minutes);
 
 #endif /* SCHEDULER_H_ */

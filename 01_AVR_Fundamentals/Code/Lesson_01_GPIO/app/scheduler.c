@@ -193,3 +193,24 @@ void Scheduler_Init(void)
 	
 	}
 }
+
+bool Scheduler_AddFeedingTime(uint8_t hours, uint8_t minutes)
+{
+	if (feedingCount >= MAX_FEEDING_COUNT_TIMES)
+	{
+		return false;
+	}
+
+	if (hours > 23 || minutes > 59)
+	{
+		return false;
+	}
+
+	feedingSchedule[feedingCount].hours = hours;
+	feedingSchedule[feedingCount].minutes = minutes;
+	feedingCount++;
+
+	Scheduler_SaveSettings();
+
+	return true;
+}
