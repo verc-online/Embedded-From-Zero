@@ -34,21 +34,7 @@ int main(void)
 	bool previousState = false;
 	
 	DEBUG_LOG("System start");
-	
-	// TODO: Удалить и вернуть функциям static
-	FeedingTime testSave = {16, 30};
-	FeedingTime testLoad = {0, 0};
 
-	Scheduler_SaveFeedingTime(20, &testSave);
-	Scheduler_LoadFeedingTime(20, &testLoad);
-
-	UART_SendString("Loaded time: ");
-	UART_SendNumber2(testLoad.hours);
-	UART_SendChar(':');
-	UART_SendNumber2(testLoad.minutes);
-	UART_SendString("\r\n");
-	// =========================================
-	
     while (1) 
     {
 		bool currentState = Button_IsPressedDebounced();
