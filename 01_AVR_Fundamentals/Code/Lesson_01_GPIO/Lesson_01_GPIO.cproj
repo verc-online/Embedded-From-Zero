@@ -148,6 +148,12 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="app\command.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="app\command.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="app\debug.c">
       <SubType>compile</SubType>
     </Compile>

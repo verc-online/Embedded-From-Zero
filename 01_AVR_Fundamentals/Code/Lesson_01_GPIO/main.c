@@ -17,6 +17,7 @@
 #include "drivers/uart.h"
 #include "app/debug.h"
 #include "drivers/eeprom.h"
+#include "app/command.h"
 
 int main(void)
 {
@@ -29,7 +30,7 @@ int main(void)
 	
 	Feeder_Init();
 	Scheduler_Init();
-
+	Command_Init();
 	
 	bool previousState = false;
 	
@@ -48,6 +49,7 @@ int main(void)
 		
 		Scheduler_Process();
 		Feeder_Process();
+		Command_Process();
     }
 }
 
