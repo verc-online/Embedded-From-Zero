@@ -27,7 +27,6 @@ int main(void)
 	Servo_Init();
 	TWI_Init();
 	UART_Init();
-	
 	Feeder_Init();
 	Scheduler_Init();
 	Command_Init();

@@ -10,6 +10,8 @@
 #include "../drivers/timer.h"
 #include "../drivers/ds3231.h"
 #include "../drivers/eeprom.h"
+#include "../drivers/uart.h"
+
 #include "debug.h"
 
 #define  SCHEDULER_SECONDS_TICKS 61
@@ -147,6 +149,22 @@ bool Scheduler_SaveSettings(void)
 	return true;
 }
 
+
+void Scheduler_PrintSchedule(void)
+{
+	UART_SendString("Schedule:\r\n");
+	for (uint8_t i = 0; i < feedingCount; i++)
+	{
+		UART_SendNumber(i + 1);
+ 		UART_SendString(". ");
+
+		UART_SendNumber2(feedingSchedule[i].hours);
+		UART_SendChar(':');
+		UART_SendNumber2(feedingSchedule[i].minutes);
+
+		UART_SendString("\r\n");
+	}
+}
 
 void Scheduler_Init(void)
 {

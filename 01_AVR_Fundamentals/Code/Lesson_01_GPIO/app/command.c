@@ -11,6 +11,7 @@
 #include "../drivers/uart.h"
 #include "debug.h"
 #include "../drivers/ds3231.h"
+#include "scheduler.h"
 
 static char commandBuffer[COMMAND_BUFFER_SIZE];
 static uint8_t commandIndex = 0;
@@ -41,13 +42,18 @@ static void Command_Execute(const char *command)
 
 		return;
 	}
+	if (strcmp(command, "show") == 0)
+	{
+		Scheduler_PrintSchedule();
+		return;
+	}
 
 	UART_SendString("Unknown command: ");
 	UART_SendString(command);
 	UART_SendString("\r\n");
 }
 
-void Command_Process()
+void Command_Process(void)
 {
 	if (!UART_IsCharAvailable())
 	{
@@ -57,6 +63,10 @@ void Command_Process()
 	char c = UART_ReadChar();
 	if ((c == '\r') || (c == '\n'))
 	{
+		if (commandIndex == 0)
+		{
+			return;
+		}
 		commandBuffer[commandIndex] = '\0';
 
 		Command_Execute(commandBuffer);

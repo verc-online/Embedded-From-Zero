@@ -16,5 +16,6 @@ void Scheduler_Init(void);
 void Scheduler_Process(void);
 bool Scheduler_LoadSettings(void);
 bool Scheduler_SaveSettings(void);
+void Scheduler_PrintSchedule(void);
 
 #endif /* SCHEDULER_H_ */
