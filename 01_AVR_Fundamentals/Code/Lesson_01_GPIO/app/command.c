@@ -7,6 +7,8 @@
 #define COMMAND_BUFFER_SIZE 32
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
 #include "command.h"
 #include "../drivers/uart.h"
 #include "debug.h"
@@ -16,6 +18,85 @@
 static char commandBuffer[COMMAND_BUFFER_SIZE];
 static uint8_t commandIndex = 0;
 
+static bool Command_ParseAdd(char *command,
+uint8_t *hours,
+uint8_t *minutes)
+{
+	// Указатель на текущий токен (часть строки)
+	char *token;
+
+	// Получаем первый токен
+	// Для строки:
+	// "add 20 30"
+	// token -> "add"
+	token = strtok(command, " ");
+
+	if (token == NULL)
+	{
+		return false;
+	}
+
+	// Проверяем, что это действительно команда add
+	if (strcmp(token, "add") != 0)
+	{
+		return false;
+	}
+
+	// Получаем второй токен
+	// token -> "20"
+	token = strtok(NULL, " ");
+
+	if (token == NULL)
+	{
+		return false;
+	}
+
+	// Преобразуем строку в число
+	int parsedHours = atoi(token);
+
+	// Проверяем диапазон часов
+	if ((parsedHours < 0) || (parsedHours > 23))
+	{
+		return false;
+	}
+
+	// Сохраняем результат
+	*hours = (uint8_t)parsedHours;
+
+	// Получаем третий токен
+	// token -> "30"
+	token = strtok(NULL, " ");
+
+	if (token == NULL)
+	{
+		return false;
+	}
+
+	// Преобразуем строку в число
+	int parsedMinutes = atoi(token);
+
+	// Проверяем диапазон минут
+	if ((parsedMinutes < 0) || (parsedMinutes > 59))
+	{
+		return false;
+	}
+
+	// Сохраняем результат
+	*minutes = (uint8_t)parsedMinutes;
+
+	// Проверяем, что больше параметров нет
+	// Команда:
+	// "add 20 30"
+	// пройдёт
+	//
+	// Команда:
+	// "add 20 30 abc"
+	// не пройдёт
+	token = strtok(NULL, " ");
+
+	return token == NULL;
+}
+
 void Command_Init(void)
 {
 
@@ -24,7 +105,7 @@ void Command_Init(void)
 	DEBUG_LOG("Command initialized");
 }
 
-static void Command_Execute(const char *command)
+static void Command_Execute(char *command)
 {
 	if (strcmp(command, "time") == 0)
 	{
@@ -59,7 +140,7 @@ static void Command_Execute(const char *command)
 	uint8_t hours;
 	uint8_t minutes;
 
-	if (sscanf(command, "add %hhu %hhu", &hours, &minutes) == 2)
+	if (Command_ParseAdd(command, &hours, &minutes))
 	{
 		if (Scheduler_AddFeedingTime(hours, minutes))
 		{
