@@ -145,6 +145,99 @@ static bool Command_ParseDelete(char * command, uint8_t * index)
 		return token == NULL;
 }
 
+static bool Command_ParseSetTime(char * command, uint8_t* hours, uint8_t* minutes, uint8_t* seconds)
+{
+	// Указатель на текущий токен (часть строки)
+	char *token;
+
+	// Получаем первый токен
+	// Для строки:
+	// "settime 20 30"
+	// token -> "settime"
+	token = strtok(command, " ");
+
+	if (token == NULL)
+	{
+		return false;
+	}
+
+	// Проверяем, что это действительно команда settime
+	if (strcmp(token, "settime") != 0)
+	{
+		return false;
+	}
+
+	// Получаем второй токен
+	// token -> "20"
+	token = strtok(NULL, " ");
+
+	if (token == NULL)
+	{
+		return false;
+	}
+
+	// Преобразуем строку в число
+	int parsedHours = atoi(token);
+
+	// Проверяем диапазон часов
+	if ((parsedHours < 0) || (parsedHours > 23))
+	{
+		return false;
+	}
+
+	// Сохраняем результат
+	*hours = (uint8_t)parsedHours;
+
+	// Получаем третий токен
+	// token -> "30"
+	token = strtok(NULL, " ");
+
+	if (token == NULL)
+	{
+		return false;
+	}
+
+	// Преобразуем строку в число
+	int parsedMinutes = atoi(token);
+
+	// Проверяем диапазон минут
+	if ((parsedMinutes < 0) || (parsedMinutes > 59))
+	{
+		return false;
+	}
+
+	// Сохраняем результат
+	*minutes = (uint8_t)parsedMinutes;
+	
+	// Получаем четвертый токен
+	// token -> "30"
+	token = strtok(NULL, " ");
+
+	// Преобразуем строку в число
+	int parsedSeconds = atoi(token);
+
+	// Проверяем диапазон минут
+	if ((parsedSeconds < 0) || (parsedSeconds > 59))
+	{
+		return false;
+	}
+
+	// Сохраняем результат
+	*seconds = (uint8_t)parsedSeconds;
+
+	// Проверяем, что больше параметров нет
+	// Команда:
+	// "settime 20 30 10"
+	// пройдёт
+	//
+	// Команда:
+	// "settime 20 30 10 abc"
+	// не пройдёт
+	token = strtok(NULL, " ");
+
+	return token == NULL;
+}
+
 static void Command_Execute(char *command)
 {
 	if (strcmp(command, "time") == 0)
@@ -192,6 +285,30 @@ static void Command_Execute(char *command)
 		return;
 	}
 	
+	if (strncmp(command, "settime ", 8) == 0)
+	{
+		uint8_t hours;
+		uint8_t minutes;
+		uint8_t seconds;
+		if (Command_ParseSetTime(command, &hours, &minutes, &seconds))
+		{
+			RtcTime time = {hours, minutes, seconds};
+			if (DS3231_SetTime(&time))
+			{
+				UART_SendLine("Time set");
+			}
+			else
+			{
+				UART_SendLine("Failed to set time");
+			}
+			if (DS3231_ReadTime(&time))
+			{
+				UART_SendTime(time.hours, time.minutes, time.seconds);
+				UART_SendString("\r\n");
+			}
+			return;
+		}
+	}
 
 	if (strncmp(command, "add ", 4) == 0)
 	{
