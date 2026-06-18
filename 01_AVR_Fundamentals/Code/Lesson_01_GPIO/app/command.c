@@ -105,6 +105,46 @@ void Command_Init(void)
 	DEBUG_LOG("Command initialized");
 }
 
+static bool Command_ParseDelete(char * command, uint8_t * index)
+{
+		// Указатель на текущий токен (часть строки)
+		char *token;
+
+		// Получаем первый токен
+		// Для строки:
+		// "delete 20"
+		// token -> "delete"
+		token = strtok(command, " ");
+
+		if (token == NULL)
+		{
+			return false;
+		}
+
+		// Проверяем, что это действительно команда delete
+		if (strcmp(token, "delete") != 0)
+		{
+			return false;
+		}
+
+		// Получаем второй токен
+		// token -> "1"
+		token = strtok(NULL, " ");
+
+		if (token == NULL)
+		{
+			return false;
+		}
+
+
+		// Сохраняем результат, проверять уже будем внутри scheduler, потому что command.c не должен ничего знать про кормления
+		*index = (uint8_t)atoi(token);
+
+		// Проверяем, есть ли следующий токен, мы ожидаем, что нет
+		token = strtok(NULL, " ");
+		return token == NULL;
+}
+
 static void Command_Execute(char *command)
 {
 	if (strcmp(command, "time") == 0)
@@ -151,21 +191,44 @@ static void Command_Execute(char *command)
 		UART_SendLine("add HH MM");
 		return;
 	}
-	uint8_t hours;
-	uint8_t minutes;
+	
 
-	if (Command_ParseAdd(command, &hours, &minutes))
+	if (strncmp(command, "add ", 4) == 0)
 	{
-		if (Scheduler_AddFeedingTime(hours, minutes))
+		uint8_t hours;
+		uint8_t minutes;
+		if (Command_ParseAdd(command, &hours, &minutes))
 		{
-			UART_SendLine("Feeding time added");
+			if (Scheduler_AddFeedingTime(hours, minutes))
+			{
+				UART_SendLine("Feeding time added");
+			}
+			else
+			{
+				UART_SendLine("Failed to add feeding time");
+			}
+			Scheduler_PrintSchedule();
+			return;
 		}
-		else
-		{
-			UART_SendLine("Failed to add feeding time");
-		}
+	}
+	
+	if (strncmp(command, "delete ", 7) == 0)
+	{
+		uint8_t index;
 
-		return;
+		if (Command_ParseDelete(command, &index))
+		{
+			if ((index > 0) && Scheduler_DeleteFeedingTime(index - 1))
+			{
+				UART_SendLine("Feeding time deleted");
+			}
+			else
+			{
+				UART_SendLine("Failed to delete feeding time");
+			}
+			Scheduler_PrintSchedule();
+			return;
+		}
 	}
 	
 	UART_SendString("Unknown command: ");

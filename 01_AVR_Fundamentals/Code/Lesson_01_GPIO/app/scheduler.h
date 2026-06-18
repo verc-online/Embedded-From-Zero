@@ -19,5 +19,6 @@ bool Scheduler_SaveSettings(void);
 void Scheduler_PrintSchedule(void);
 bool Scheduler_AddFeedingTime(uint8_t hours, uint8_t minutes);
 bool Scheduler_LoadDefaultSchedule(void);
+bool Scheduler_DeleteFeedingTime(uint8_t index);
 
 #endif /* SCHEDULER_H_ */

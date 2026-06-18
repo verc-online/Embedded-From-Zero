@@ -146,7 +146,7 @@ bool Scheduler_SaveSettings(void)
 		Scheduler_SaveFeedingTime(address, &feedingSchedule[i]);
 	}
 	
-	DEBUG_LOG("Default Schedule Saved");
+	DEBUG_LOG("Schedule Saved");
 	return true;
 }
 
@@ -167,7 +167,7 @@ void Scheduler_PrintSchedule(void)
 	}
 }
 
-bool Scheduler_LoadDefaultSchedule()
+bool Scheduler_LoadDefaultSchedule(void)
 {
 	feedingCount = sizeof(defaultSchedule) / sizeof(defaultSchedule[0]);
 	
@@ -219,4 +219,21 @@ bool Scheduler_AddFeedingTime(uint8_t hours, uint8_t minutes)
 	Scheduler_SaveSettings();
 
 	return true;
+}
+
+bool Scheduler_DeleteFeedingTime(uint8_t index)
+{
+	if (index >= feedingCount)
+	{
+		return false;
+	}
+	
+	for (uint8_t i = index; i < feedingCount - 1; i++)
+	{
+		feedingSchedule[i] = feedingSchedule[i + 1];
+	}
+
+	feedingCount--;
+	
+	return Scheduler_SaveSettings();
 }
