@@ -128,12 +128,26 @@ static void Command_Execute(char *command)
 		Scheduler_PrintSchedule();
 		return;
 	}
+	if (strcmp(command, "default") == 0)
+	{
+		if (Scheduler_LoadDefaultSchedule())
+		{
+			UART_SendLine("Default schedule loaded");
+		}
+		else
+		{
+			UART_SendLine("Failed to load default schedule");
+		}
+		Scheduler_PrintSchedule();
+		return;
+	}
 	if (strcmp(command, "help") == 0)
 	{
 		UART_SendLine("Available commands:");
 		UART_SendLine("help");
 		UART_SendLine("time");
 		UART_SendLine("show");
+		UART_SendLine("default");
 		UART_SendLine("add HH MM");
 		return;
 	}

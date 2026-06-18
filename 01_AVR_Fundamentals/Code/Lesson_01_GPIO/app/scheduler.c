@@ -146,6 +146,7 @@ bool Scheduler_SaveSettings(void)
 		Scheduler_SaveFeedingTime(address, &feedingSchedule[i]);
 	}
 	
+	DEBUG_LOG("Default Schedule Saved");
 	return true;
 }
 
@@ -166,6 +167,18 @@ void Scheduler_PrintSchedule(void)
 	}
 }
 
+bool Scheduler_LoadDefaultSchedule()
+{
+	feedingCount = sizeof(defaultSchedule) / sizeof(defaultSchedule[0]);
+	
+	for (uint8_t i = 0; i < feedingCount; i++)
+	{
+		feedingSchedule[i] = defaultSchedule[i];
+	}
+	
+	return Scheduler_SaveSettings();
+}
+
 void Scheduler_Init(void)
 {
 	RtcTime currentTime;
@@ -181,15 +194,8 @@ void Scheduler_Init(void)
 	DEBUG_LOG("Initializing Schedule");
 	if (!Scheduler_LoadSettings())
 	{
-		feedingCount = sizeof(defaultSchedule) / sizeof(defaultSchedule[0]);
+		Scheduler_LoadDefaultSchedule();
 		
-		for (uint8_t i = 0; i < feedingCount; i++)
-		{
-			feedingSchedule[i] = defaultSchedule[i];
-		}
-		
-		Scheduler_SaveSettings();
-		DEBUG_LOG("Default Schedule Saved");
 	
 	}
 }
