@@ -144,3 +144,12 @@ void LCD_PrintChar(char c)
 {
 	LCD_WriteData(c);
 }
+
+void LCD_Print(const char *text)
+{
+	while(*text != '\0')
+	{
+		LCD_PrintChar(*text);
+		text++;
+	}
+}
