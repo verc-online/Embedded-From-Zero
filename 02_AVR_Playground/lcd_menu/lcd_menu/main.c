@@ -12,15 +12,11 @@
 int main(void)
 {
 	LCD_Init();
-
-	LCD_SetCursor(0, 0);
-	LCD_Print("Hello Kisimisi!");
-	
-	LCD_SetCursor(1, 0);
-	LCD_Print("I love you <3");
+	Menu_Init();
 	
     while (1) 
     {
+		Menu_Process();
     }
 }
 
