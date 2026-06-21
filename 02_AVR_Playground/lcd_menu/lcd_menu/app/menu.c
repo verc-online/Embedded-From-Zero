@@ -4,8 +4,9 @@
 * Created: 20.06.2026 14:07:48
 *  Author: HP
 */
-
+#include "../config/config.h"
 #include "../drivers/lcd1602.h"
+#include <stdbool.h>
 
 typedef enum
 {
@@ -64,7 +65,7 @@ static void Menu_RenderMenu(void)
 	LCD_Clear();
 	
 	LCD_SetCursor(0, 0);
-	LCD_Print(" > ");
+	LCD_Print("> ");
 	LCD_Print(menuItems[selectedItem]);
 	
 	LCD_SetCursor(1, 0);
@@ -133,13 +134,42 @@ static void Menu_RenderSetTime(void)
 	LCD_Print("OK: Back");
 }
 
+static bool ButtonOk_IsPressed(void)
+{
+	return (BUTTON_OK_PINREG & (1 << BUTTON_OK_PIN)) == 0;
+}
+
+
 static ButtonEvent Menu_ReadButtonEvent(void)
 {
+	static bool wasPressed = false;
+
+	bool isPressed = ButtonOk_IsPressed();
+
+	if (isPressed && !wasPressed)
+	{
+		wasPressed = true;
+		return BUTTON_EVENT_OK;
+	}
+
+	if (!isPressed)
+	{
+		wasPressed = false;
+	}
+
 	return BUTTON_EVENT_NONE;
 }
 
+void ButtonOk_Init(void)
+{
+	BUTTON_OK_DDR &= ~(1 << BUTTON_OK_PIN);   // вход
+	BUTTON_OK_PORT |= (1 << BUTTON_OK_PIN);   // pull-up
+}
+
+
 void Menu_Init(void)
 {
+	ButtonOk_Init();
 	menuState = MENU_STATE_MAIN_SCREEN;
 	selectedItem = MENU_ITEM_SHOW_SCHEDULE;
 	Menu_RenderMainScreen();
@@ -157,21 +187,76 @@ void Menu_Process(void)
 	switch (menuState)
 	{
 		case MENU_STATE_MAIN_SCREEN:
-		break;
+			if (event == BUTTON_EVENT_OK)
+			{
+				menuState = MENU_STATE_MENU;
+				Menu_RenderMenu();
+			}
+			break;
 
 		case MENU_STATE_MENU:
-		break;
+			switch(event)
+			{
+				case BUTTON_EVENT_UP:
+					if (selectedItem > MENU_ITEM_SHOW_SCHEDULE)
+					{
+						selectedItem--;
+						Menu_RenderMenu();
+					}
+					break;
+
+				case BUTTON_EVENT_DOWN:
+					if (selectedItem < MENU_ITEM_BACK)
+					{
+						selectedItem++;
+						Menu_RenderMenu();
+					}
+					break;
+
+				case BUTTON_EVENT_OK:
+					Menu_SelectCurrentItem();
+
+					switch (menuState)
+					{
+						case MENU_STATE_MAIN_SCREEN:
+						Menu_RenderMainScreen();
+						break;
+
+						case MENU_STATE_SHOW_SCHEDULE:
+						Menu_RenderShowSchedule();
+						break;
+
+						case MENU_STATE_ADD_FEEDING:
+						Menu_RenderAddFeeding();
+						break;
+
+						case MENU_STATE_DELETE_FEEDING:
+						Menu_RenderDeleteFeeding();
+						break;
+
+						case MENU_STATE_SET_TIME:
+						Menu_RenderSetTime();
+						break;
+
+						default:
+						break;
+					}
+					break;
+				
+				default:
+					break;
+			}
+			break;
 
 		case MENU_STATE_SHOW_SCHEDULE:
-		break;
-
 		case MENU_STATE_ADD_FEEDING:
-		break;
-
 		case MENU_STATE_DELETE_FEEDING:
-		break;
-
 		case MENU_STATE_SET_TIME:
+		if (event == BUTTON_EVENT_OK)
+		{
+			menuState = MENU_STATE_MENU;
+			Menu_RenderMenu();
+		}
 		break;
 	}
 }

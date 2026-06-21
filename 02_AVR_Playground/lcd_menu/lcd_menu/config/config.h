@@ -9,6 +9,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include <avr/io.h>
 #define  F_CPU 1000000UL
 
 // У контроллера есть два регистра:
@@ -62,5 +63,10 @@
 #define LCD_D7_PORT PORTB
 #define LCD_D7_DDR  DDRB
 #define LCD_D7_PIN  PB5
+
+#define BUTTON_OK_PORT    PORTD
+#define BUTTON_OK_PINREG  PIND
+#define BUTTON_OK_DDR     DDRD
+#define BUTTON_OK_PIN     PD2
 
 #endif /* CONFIG_H_ */
