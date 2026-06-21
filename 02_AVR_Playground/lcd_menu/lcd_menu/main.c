@@ -13,7 +13,11 @@ int main(void)
 {
 	LCD_Init();
 
-	LCD_Print("I love Kisimisi");
+	LCD_SetCursor(0, 0);
+	LCD_Print("Hello Kisimisi!");
+	
+	LCD_SetCursor(1, 0);
+	LCD_Print("I love you <3");
 	
     while (1) 
     {

@@ -153,3 +153,26 @@ void LCD_Print(const char *text)
 		text++;
 	}
 }
+
+void LCD_SetCursor(uint8_t row,
+uint8_t column)
+{
+	// Display position DDRAM address 
+	// 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 
+	// 40 41 42 43 44 45 46 47 48 49 4A 4B 4C 4D 4E 4F 
+	// 2-Line by 16-Character D
+	// Set DDRAM Address
+	// RS R/W DB7 DB6 DB5 DB4 DB3 DB2 DB1 DB0
+	// 0   0   1  AC6 AC5 AC4 AC3 AC2 AC1 AC0 
+	
+	uint8_t line = 0x00;
+	if (row == 1)
+	{
+		line = 0x40;
+	}
+	if (column > 15)
+	{
+		column = 15;
+	}
+	LCD_WriteCommand((1 << 7) | (line + column));
+}
