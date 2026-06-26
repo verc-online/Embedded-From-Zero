@@ -31,13 +31,13 @@
      <ITEM name="nItems">0</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="450" x="1470" flags="00008023" y="229" h="250" pid="0" iid="9">
+   <POPUP w="450" x="1267" flags="00000023" y="818" h="250" pid="0" iid="9">
     <PROPERTIES>
      <ITEM name="AutoEcho">0</ITEM>
      <ITEM name="HexMode">0</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="226" x="278" flags="00000008" y="197" h="215" pid="3" iid="1">
+   <POPUP w="30" x="278" flags="00000008" y="197" h="16" pid="3" iid="1">
     <PROPERTIES/>
    </POPUP>
    <POPUP w="8" x="298" flags="0000000a" y="217" h="1" pid="10" iid="1">
@@ -100,7 +100,7 @@
      <ITEM name="TopLineAddress">00000020</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="156" x="1280" flags="00000001" y="243" h="72" pid="1" iid="6">
+   <POPUP w="20" x="634" flags="00008001" y="828" h="3" pid="1" iid="6">
     <PROPERTIES/>
    </POPUP>
    <POPUP w="8" x="438" flags="00000008" y="357" h="32" pid="2" iid="6">

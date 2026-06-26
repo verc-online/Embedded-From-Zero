@@ -176,3 +176,11 @@ uint8_t column)
 	}
 	LCD_WriteCommand((1 << 7) | (line + column));
 }
+
+void LCD_Print2Digits(uint8_t value)
+{
+	LCD_PrintChar((value / 10) + '0');
+	LCD_PrintChar((value % 10) + '0');
+}
+
+

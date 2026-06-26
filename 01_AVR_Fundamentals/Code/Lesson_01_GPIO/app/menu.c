@@ -44,12 +44,27 @@ static const char *menuItems[] =
 
 #define MENU_ITEMS_COUNT (sizeof(menuItems) / sizeof(menuItems[0]))
 
+#include "../drivers/ds3231.h"
 static void Menu_RenderMainScreen(void)
 {
 	LCD_Clear();
-	
-	LCD_SetCursor(0, 0);
-	LCD_Print("Kormushka v0.3");
+
+	RtcTime time;
+
+	if (DS3231_ReadTime(&time))
+	{
+		LCD_SetCursor(0, 0);
+		LCD_Print2Digits(time.hours);
+		LCD_Print(":");
+		LCD_Print2Digits(time.minutes);
+		LCD_Print(":");
+		LCD_Print2Digits(time.seconds);
+	}
+	else
+	{
+		LCD_SetCursor(0, 0);
+		LCD_Print("RTC Error");
+	}
 
 	LCD_SetCursor(1, 0);
 	LCD_Print("OK: Menu");
