@@ -11,8 +11,21 @@
 
 #include <stdbool.h>
 
-void Button_Init(void);
-bool Button_IsPressed(void);
-bool Button_IsPressedDebounced(void);
+// V2 Button driver
+typedef enum
+{
+	BUTTON_EVENT_NONE,
+
+	BUTTON_EVENT_OK,
+
+	BUTTON_EVENT_UP,
+
+	BUTTON_EVENT_DOWN
+
+} ButtonEvent;
+
+void ButtonOkUpDown_Init(void);
+
+ButtonEvent Button_GetEvent(void);
 
 #endif /* BUTTON_H_ */

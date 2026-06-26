@@ -18,11 +18,12 @@
 #include "app/debug.h"
 #include "drivers/eeprom.h"
 #include "app/command.h"
+#include "drivers/lcd1602.h"
+#include "app/menu.h"
 
 int main(void)
 {
 	Led_Init();
-	Button_Init();
 	Timer_Init();
 	Servo_Init();
 	TWI_Init();
@@ -30,25 +31,18 @@ int main(void)
 	Feeder_Init();
 	Scheduler_Init();
 	Command_Init();
-	
-	bool previousState = false;
+	LCD_Init();
+	Menu_Init();
+		
 	
 	DEBUG_LOG("System start");
 
     while (1) 
     {
-		bool currentState = Button_IsPressedDebounced();
-		
-		if((previousState == false) && (currentState == true))
-		{
-			DEBUG_LOG("Scheduler match");
-			Feeder_Request();
-		}
-		previousState = currentState;
-		
 		Scheduler_Process();
 		Feeder_Process();
 		Command_Process();
+		Menu_Process();
     }
 }
 

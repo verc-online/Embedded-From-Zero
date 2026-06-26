@@ -9,30 +9,78 @@
 #include <stdbool.h>
 #include "button.h"
 #include "../config/config.h"
-#include <util/delay.h>
 
-void Button_Init(void)
+// V2 Driver
+
+static bool ButtonOk_IsPressed(void)
 {
-	// Настраиваем пин кнопки как вход
-	DDRD &= ~(1 << BUTTON_PIN);
-	
-	//Включаем внутреннуюю подтяжку Pull-Up
-	PORTD |= (1 << BUTTON_PIN);
-}
-bool Button_IsPressed(void)
-{
-	// Кнопка подключена к земле, поэтому при нажатии читаем 0
-	return !(PIND &(1 << BUTTON_PIN));
+	return (BUTTON_OK_PINREG & (1 << BUTTON_OK_PIN)) == 0;
 }
 
-bool Button_IsPressedDebounced(void)
+static bool ButtonUp_IsPressed(void)
 {
-	if (!Button_IsPressed())
+	return (BUTTON_UP_PINREG & (1 << BUTTON_UP_PIN)) == 0;
+}
+
+static bool ButtonDown_IsPressed(void)
+{
+	return (BUTTON_DOWN_PINREG & (1 << BUTTON_DOWN_PIN)) == 0;
+}
+
+void ButtonOkUpDown_Init(void)
+{
+	BUTTON_OK_DDR &= ~(1 << BUTTON_OK_PIN);
+	BUTTON_OK_PORT |= (1 << BUTTON_OK_PIN);
+
+	BUTTON_UP_DDR &= ~(1 << BUTTON_UP_PIN);
+	BUTTON_UP_PORT |= (1 << BUTTON_UP_PIN);
+
+	BUTTON_DOWN_DDR &= ~(1 << BUTTON_DOWN_PIN);
+	BUTTON_DOWN_PORT |= (1 << BUTTON_DOWN_PIN);
+}
+
+ButtonEvent Button_GetEvent(void)
+{
+	static bool okWasPressed = false;
+	static bool upWasPressed = false;
+	static bool downWasPressed = false;
+
+	bool okIsPressed = ButtonOk_IsPressed();
+	bool upIsPressed = ButtonUp_IsPressed();
+	bool downIsPressed = ButtonDown_IsPressed();
+
+	if (okIsPressed && !okWasPressed)
 	{
-		return false;
+		okWasPressed = true;
+		return BUTTON_EVENT_OK;
 	}
 
-	_delay_ms(20);
+	if (upIsPressed && !upWasPressed)
+	{
+		upWasPressed = true;
+		return BUTTON_EVENT_UP;
+	}
 
-	return Button_IsPressed();
+	if (downIsPressed && !downWasPressed)
+	{
+		downWasPressed = true;
+		return BUTTON_EVENT_DOWN;
+	}
+
+	if (!okIsPressed)
+	{
+		okWasPressed = false;
+	}
+
+	if (!upIsPressed)
+	{
+		upWasPressed = false;
+	}
+
+	if (!downIsPressed)
+	{
+		downWasPressed = false;
+	}
+
+	return BUTTON_EVENT_NONE;
 }

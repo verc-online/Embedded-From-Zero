@@ -166,6 +166,12 @@
     <Compile Include="app\feeder.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="app\menu.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="app\menu.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="app\scheduler.c">
       <SubType>compile</SubType>
     </Compile>
@@ -191,6 +197,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="drivers\eeprom.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="drivers\lcd1602.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="drivers\lcd1602.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="drivers\led.c">
