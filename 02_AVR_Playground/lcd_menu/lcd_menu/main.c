@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include "config/config.h"
 #include "drivers/lcd1602.h"
+#include "app/menu.h"
 
 int main(void)
 {

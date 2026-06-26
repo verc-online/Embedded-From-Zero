@@ -6,6 +6,8 @@
 */
 #include "../config/config.h"
 #include "../drivers/lcd1602.h"
+#include "../drivers/button.h"
+
 #include <stdbool.h>
 
 typedef enum
@@ -27,13 +29,6 @@ typedef enum
 	MENU_ITEM_BACK
 } MenuItem;
 
-typedef enum
-{
-	BUTTON_EVENT_NONE,
-	BUTTON_EVENT_UP,
-	BUTTON_EVENT_DOWN,
-	BUTTON_EVENT_OK
-} ButtonEvent;
 
 static MenuState menuState = MENU_STATE_MAIN_SCREEN;
 static MenuItem selectedItem = MENU_ITEM_SHOW_SCHEDULE;
@@ -134,42 +129,12 @@ static void Menu_RenderSetTime(void)
 	LCD_Print("OK: Back");
 }
 
-static bool ButtonOk_IsPressed(void)
-{
-	return (BUTTON_OK_PINREG & (1 << BUTTON_OK_PIN)) == 0;
-}
 
-
-static ButtonEvent Menu_ReadButtonEvent(void)
-{
-	static bool wasPressed = false;
-
-	bool isPressed = ButtonOk_IsPressed();
-
-	if (isPressed && !wasPressed)
-	{
-		wasPressed = true;
-		return BUTTON_EVENT_OK;
-	}
-
-	if (!isPressed)
-	{
-		wasPressed = false;
-	}
-
-	return BUTTON_EVENT_NONE;
-}
-
-void ButtonOk_Init(void)
-{
-	BUTTON_OK_DDR &= ~(1 << BUTTON_OK_PIN);   // вход
-	BUTTON_OK_PORT |= (1 << BUTTON_OK_PIN);   // pull-up
-}
 
 
 void Menu_Init(void)
 {
-	ButtonOk_Init();
+	ButtonOkUpDown_Init();
 	menuState = MENU_STATE_MAIN_SCREEN;
 	selectedItem = MENU_ITEM_SHOW_SCHEDULE;
 	Menu_RenderMainScreen();
@@ -177,7 +142,7 @@ void Menu_Init(void)
 
 void Menu_Process(void)
 {
-	ButtonEvent event = Menu_ReadButtonEvent();
+	ButtonEvent event = Button_GetEvent();
 
 	if (event == BUTTON_EVENT_NONE)
 	{
