@@ -44,7 +44,7 @@ uint32_t Timer_GetTicks(void)
 	return ticks;
 }
 
-bool Timer_HasElapsed(uint32_t startTime, uint32_t intervalMs)
+bool Timer_HasElapsed(uint32_t startTime, uint32_t intervalTicks)
 {
-	return (Timer_GetTicks() - startTime) >= intervalMs;
+	return (Timer_GetTicks() - startTime) >= intervalTicks;
 }

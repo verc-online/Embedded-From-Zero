@@ -155,8 +155,20 @@ void Menu_Init(void)
 	Menu_RenderMainScreen();
 }
 
+#include "../drivers/timer.h"
+
 void Menu_Process(void)
 {
+	static uint32_t lastRefreshTime;
+	if (menuState == MENU_STATE_MAIN_SCREEN)
+	{
+		if (Timer_HasElapsed(lastRefreshTime, MENU_MAIN_REFRESH_TICKS))
+		{
+			lastRefreshTime = Timer_GetTicks();
+			Menu_RenderMainScreen();
+		}
+	}
+	
 	ButtonEvent event = Button_GetEvent();
 
 	if (event == BUTTON_EVENT_NONE)
