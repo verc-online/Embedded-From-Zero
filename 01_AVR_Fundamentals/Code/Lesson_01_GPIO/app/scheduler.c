@@ -11,7 +11,7 @@
 #include "../drivers/ds3231.h"
 #include "../drivers/eeprom.h"
 #include "../drivers/uart.h"
-
+#include <stddef.h>
 #include "debug.h"
 
 #define  SCHEDULER_SECONDS_TICKS 61
@@ -23,11 +23,6 @@
 
 #define MAX_FEEDING_COUNT_TIMES 5
 
-typedef struct
-{
-	uint8_t hours;
-	uint8_t minutes;
-} FeedingTime;
 
 static uint8_t feedingCount = 0;
 static FeedingTime feedingSchedule[MAX_FEEDING_COUNT_TIMES];
@@ -62,7 +57,7 @@ const FeedingTime *time)
 	}
 }
 
-static void Scheduler_LoadFeedingTime(uint16_t address,											FeedingTime *time)
+static void Scheduler_LoadFeedingTime(uint16_t address,	FeedingTime *time)
 {
 	uint8_t *ptr = (uint8_t*)time;
 	for (uint8_t i = 0; i < sizeof(*time); i++)
@@ -236,4 +231,25 @@ bool Scheduler_DeleteFeedingTime(uint8_t index)
 	feedingCount--;
 	
 	return Scheduler_SaveSettings();
+}
+
+uint8_t Scheduler_GetFeedingCount(void)
+{
+	return feedingCount;
+}
+
+bool Scheduler_GetFeedingTime(uint8_t index, FeedingTime *time)
+{
+	if (time == NULL)
+	{
+		return false;
+	}
+
+	if (index >= feedingCount)
+	{
+		return false;
+	}
+
+	*time = feedingSchedule[index];
+	return true;
 }

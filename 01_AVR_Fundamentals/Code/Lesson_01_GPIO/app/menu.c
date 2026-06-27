@@ -7,6 +7,8 @@
 #include "../config/config.h"
 #include "../drivers/lcd1602.h"
 #include "../drivers/button.h"
+#include "../app/scheduler.h"
+#include "../drivers/ds3231.h"
 
 #include <stdbool.h>
 
@@ -42,9 +44,10 @@ static const char *menuItems[] =
 	"Back"
 };
 
+static uint8_t scheduleFirstVisibleIndex = 0;
+			
 #define MENU_ITEMS_COUNT (sizeof(menuItems) / sizeof(menuItems[0]))
 
-#include "../drivers/ds3231.h"
 static void Menu_RenderMainScreen(void)
 {
 	LCD_Clear();
@@ -111,12 +114,34 @@ static void Menu_SelectCurrentItem(void)
 static void Menu_RenderShowSchedule(void)
 {
 	LCD_Clear();
-	LCD_SetCursor(0, 0);
-	LCD_Print("Schedule");
-	LCD_SetCursor(1, 0);
-	LCD_Print("OK: Back");
-}
 
+	FeedingTime time;
+
+	LCD_SetCursor(0, 0);
+	if (Scheduler_GetFeedingTime(scheduleFirstVisibleIndex, &time))
+	{
+		LCD_Print2Digits(time.hours);
+		LCD_Print(":");
+		LCD_Print2Digits(time.minutes);
+	}
+	else
+	{
+		LCD_Print("No schedule");
+		return;
+	}
+
+	LCD_SetCursor(1, 0);
+	if (Scheduler_GetFeedingTime(scheduleFirstVisibleIndex + 1, &time))
+	{
+		LCD_Print2Digits(time.hours);
+		LCD_Print(":");
+		LCD_Print2Digits(time.minutes);
+	}
+	else
+	{
+		LCD_Print("OK: Back");
+	}
+}
 static void Menu_RenderAddFeeding(void)
 {
 	LCD_Clear();
@@ -156,6 +181,7 @@ void Menu_Init(void)
 }
 
 #include "../drivers/timer.h"
+#include "../app/scheduler.h"
 
 void Menu_Process(void)
 {
@@ -217,7 +243,7 @@ void Menu_Process(void)
 						case MENU_STATE_SHOW_SCHEDULE:
 						Menu_RenderShowSchedule();
 						break;
-
+						
 						case MENU_STATE_ADD_FEEDING:
 						Menu_RenderAddFeeding();
 						break;
@@ -241,6 +267,43 @@ void Menu_Process(void)
 			break;
 
 		case MENU_STATE_SHOW_SCHEDULE:
+		// Нужно реализовать следующее:
+		//1. Показываем Schedule:
+		//2. Вторая строка - первое расписание
+		//3. При нажатии на кнопку вверх проверять,
+		// есть ли куда двигаться, если нет, то не реагировать
+		//4. При нажатии кнопки вниз: Если есть куда сдвигать 
+		// вторую строку на первую, на второй показывать следующее 
+		// расписание
+		//5. При нажатии ОК: выходить обратно в меню
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+					menuState = MENU_STATE_MENU;
+					Menu_RenderMenu();
+					break;
+					
+				case BUTTON_EVENT_UP:
+					if (scheduleFirstVisibleIndex > 0)
+					{
+						scheduleFirstVisibleIndex--;
+						Menu_RenderShowSchedule();
+					}
+					break;
+					
+				case BUTTON_EVENT_DOWN:
+					if ((scheduleFirstVisibleIndex + 1) < Scheduler_GetFeedingCount())
+					{
+						scheduleFirstVisibleIndex++;
+						Menu_RenderShowSchedule();
+					}
+					break;
+					
+				case BUTTON_EVENT_NONE:
+				default:
+					break;
+			}
+			break;
 		case MENU_STATE_ADD_FEEDING:
 		case MENU_STATE_DELETE_FEEDING:
 		case MENU_STATE_SET_TIME:
