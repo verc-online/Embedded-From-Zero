@@ -23,7 +23,9 @@ typedef enum
 	MENU_STATE_ADD_FEEDING_MINUTES,
 	MENU_STATE_ADD_FEEDING_RESULT,
 	MENU_STATE_DELETE_FEEDING,
+	MENU_STATE_DELETE_FEEDING_RESULT,
 	MENU_STATE_SET_TIME
+	
 } MenuState;
 
 typedef enum
@@ -49,7 +51,9 @@ static const char *menuItems[] =
 static uint8_t scheduleFirstVisibleIndex = 0;
 static uint8_t editHours = 8;
 static uint8_t editMinutes = 0;
-static bool lastOperationSuccess = false;		
+static bool lastOperationSuccess = false;	
+static uint8_t deleteSelectedIndex = 0;
+	
 #define MENU_ITEMS_COUNT (sizeof(menuItems) / sizeof(menuItems[0]))
 
 static void Menu_RenderMainScreen(void)
@@ -130,7 +134,9 @@ static void Menu_RenderShowSchedule(void)
 	}
 	else
 	{
-		LCD_Print("No schedule");
+		LCD_Print("Schedule is empty");
+		LCD_SetCursor(1, 0);
+		LCD_Print("Add feeding time");
 		return;
 	}
 
@@ -181,9 +187,38 @@ static void Menu_RenderDeleteFeeding(void)
 {
 	LCD_Clear();
 	LCD_SetCursor(0, 0);
-	LCD_Print("Delete Feeding");
-	LCD_SetCursor(1, 0);
-	LCD_Print("OK: Back");
+	FeedingTime time;
+	// Проверяем, если расписание пустое
+	if (Scheduler_GetFeedingCount() == 0)
+	{
+		LCD_Print("Nothing to delete");
+		LCD_SetCursor(1, 0);
+		LCD_Print("OK: Back");
+		return;
+	}
+	if (Scheduler_GetFeedingTime(deleteSelectedIndex, &time))
+	{
+		LCD_Print("Delete:");
+		LCD_SetCursor(1, 0);
+		LCD_Print("> ");
+		LCD_Print2Digits(time.hours);
+		LCD_Print(":");
+		LCD_Print2Digits(time.minutes);
+	}
+}
+
+static void Menu_RenderDeleteFeedingResult(void)
+{
+	const char *text = lastOperationSuccess ? "Deleted" : "Error";
+	LCD_Clear();
+	LCD_SetCursor(0, 0);
+	LCD_Print(text);
+	
+	if (Scheduler_GetFeedingCount() == 0)
+	{
+		LCD_SetCursor(1, 0);
+		LCD_Print("Schedule is empty");
+	}
 }
 
 static void Menu_RenderSetTime(void)
@@ -266,14 +301,6 @@ void Menu_Process(void)
 						
 						case MENU_STATE_ADD_FEEDING_HOURS:
 						Menu_RenderAddFeedingHours();
-						break;
-						
-						case MENU_STATE_ADD_FEEDING_MINUTES:
-						Menu_RenderAddFeedingMinutes();
-						break;
-						
-						case MENU_STATE_ADD_FEEDING_RESULT:
-						Menu_RenderShowSchedule();
 						break;
 
 						case MENU_STATE_DELETE_FEEDING:
@@ -392,6 +419,64 @@ void Menu_Process(void)
 			}
 			break;
 		case MENU_STATE_DELETE_FEEDING:
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+				if (Scheduler_GetFeedingCount() == 0)
+				{
+					menuState = MENU_STATE_SHOW_SCHEDULE;
+					Menu_RenderShowSchedule();
+					break;
+				}
+				lastOperationSuccess = Scheduler_DeleteFeedingTime(deleteSelectedIndex);
+				
+				uint8_t count = Scheduler_GetFeedingCount();
+
+				if (count == 0)
+				{
+					deleteSelectedIndex = 0;
+				}
+				else if (deleteSelectedIndex >= count)
+				{
+					deleteSelectedIndex = count - 1;
+				}
+				
+				menuState = MENU_STATE_DELETE_FEEDING_RESULT;
+				Menu_RenderDeleteFeedingResult();
+				break;
+				
+				case BUTTON_EVENT_UP:
+					if (deleteSelectedIndex == 0) break;
+					deleteSelectedIndex--;
+					Menu_RenderDeleteFeeding();
+					break;
+				
+				case BUTTON_EVENT_DOWN:
+					if ((deleteSelectedIndex + 1) < Scheduler_GetFeedingCount())
+					{
+						deleteSelectedIndex++;
+						Menu_RenderDeleteFeeding();
+					}
+					break;
+				
+				case BUTTON_EVENT_NONE:
+				default: break;
+			}
+			break;
+		case MENU_STATE_DELETE_FEEDING_RESULT:
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+				case BUTTON_EVENT_UP:
+				case BUTTON_EVENT_DOWN:
+				menuState = MENU_STATE_SHOW_SCHEDULE;
+				Menu_RenderShowSchedule();
+				break;
+				
+				case BUTTON_EVENT_NONE:
+				default: break;
+			}
+			break;
 		case MENU_STATE_SET_TIME:
 		if (event == BUTTON_EVENT_OK)
 		{

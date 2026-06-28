@@ -109,9 +109,9 @@ bool Scheduler_LoadSettings(void)
 	}
 	feedingCount = EEPROM_ReadByte(EEPROM_COUNT_ADDRESS);
 	
-	if ((feedingCount == 0) || (feedingCount > MAX_FEEDING_COUNT_TIMES))
+	if (feedingCount > MAX_FEEDING_COUNT_TIMES)
 	{
-		return false;
+		return true;
 	}
 	
 	
@@ -127,7 +127,7 @@ bool Scheduler_LoadSettings(void)
 bool Scheduler_SaveSettings(void)
 {
 	
-	if ((feedingCount == 0) || (feedingCount > MAX_FEEDING_COUNT_TIMES))
+	if (feedingCount > MAX_FEEDING_COUNT_TIMES)
 	{
 		return false;
 	}
