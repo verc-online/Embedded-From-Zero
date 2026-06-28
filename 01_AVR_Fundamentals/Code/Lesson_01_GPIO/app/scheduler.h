@@ -30,4 +30,6 @@ bool Scheduler_DeleteFeedingTime(uint8_t index);
 uint8_t Scheduler_GetFeedingCount(void);
 bool Scheduler_GetFeedingTime(uint8_t index, FeedingTime *time);
 
+bool Scheduler_UpdateFeedingTime(uint8_t index, FeedingTime *time);
+
 #endif /* SCHEDULER_H_ */

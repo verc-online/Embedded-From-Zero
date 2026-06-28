@@ -194,6 +194,40 @@ void Scheduler_Init(void)
 	
 	}
 }
+static bool FeedingTime_IsAfter(const FeedingTime *a,
+const FeedingTime *b)
+{
+	if (a->hours > b->hours) return true;
+	else if (a->hours == b->hours)
+	{
+		if (a->minutes > b->minutes) return true;
+	}
+	return false;
+}
+
+static void Scheduler_SortFeedingTimes(void)
+{
+	for (uint8_t i = 0; i < feedingCount; i++)
+	{
+		uint8_t minIndex = i;
+
+		for (uint8_t j = i + 1; j < feedingCount; j++)
+		{
+			if (FeedingTime_IsAfter(&feedingSchedule[minIndex],
+			&feedingSchedule[j]))
+			{
+				minIndex = j;
+			}
+		}
+
+		if (minIndex != i)
+		{
+			FeedingTime temp = feedingSchedule[i];
+			feedingSchedule[i] = feedingSchedule[minIndex];
+			feedingSchedule[minIndex] = temp;
+		}
+	}
+}
 
 bool Scheduler_AddFeedingTime(uint8_t hours, uint8_t minutes)
 {
@@ -210,7 +244,7 @@ bool Scheduler_AddFeedingTime(uint8_t hours, uint8_t minutes)
 	feedingSchedule[feedingCount].hours = hours;
 	feedingSchedule[feedingCount].minutes = minutes;
 	feedingCount++;
-
+	Scheduler_SortFeedingTimes();
 	Scheduler_SaveSettings();
 
 	return true;
