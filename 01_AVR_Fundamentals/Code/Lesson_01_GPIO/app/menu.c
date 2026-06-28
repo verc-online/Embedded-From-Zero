@@ -9,6 +9,8 @@
 #include "../drivers/button.h"
 #include "../app/scheduler.h"
 #include "../drivers/ds3231.h"
+#include "../drivers/timer.h"
+#include "../app/scheduler.h"
 
 #include <stdbool.h>
 
@@ -17,7 +19,9 @@ typedef enum
 	MENU_STATE_MAIN_SCREEN,
 	MENU_STATE_MENU,
 	MENU_STATE_SHOW_SCHEDULE,
-	MENU_STATE_ADD_FEEDING,
+	MENU_STATE_ADD_FEEDING_HOURS,
+	MENU_STATE_ADD_FEEDING_MINUTES,
+	MENU_STATE_ADD_FEEDING_RESULT,
 	MENU_STATE_DELETE_FEEDING,
 	MENU_STATE_SET_TIME
 } MenuState;
@@ -31,7 +35,6 @@ typedef enum
 	MENU_ITEM_BACK
 } MenuItem;
 
-
 static MenuState menuState = MENU_STATE_MAIN_SCREEN;
 static MenuItem selectedItem = MENU_ITEM_SHOW_SCHEDULE;
 
@@ -43,9 +46,10 @@ static const char *menuItems[] =
 	"Set Time",
 	"Back"
 };
-
 static uint8_t scheduleFirstVisibleIndex = 0;
-			
+static uint8_t editHours = 8;
+static uint8_t editMinutes = 0;
+static bool lastOperationSuccess = false;		
 #define MENU_ITEMS_COUNT (sizeof(menuItems) / sizeof(menuItems[0]))
 
 static void Menu_RenderMainScreen(void)
@@ -94,7 +98,7 @@ static void Menu_SelectCurrentItem(void)
 		break;
 
 		case MENU_ITEM_ADD_FEEDING:
-		menuState = MENU_STATE_ADD_FEEDING;
+		menuState = MENU_STATE_ADD_FEEDING_HOURS;
 		break;
 
 		case MENU_ITEM_DELETE_FEEDING:
@@ -142,13 +146,35 @@ static void Menu_RenderShowSchedule(void)
 		LCD_Print("OK: Back");
 	}
 }
-static void Menu_RenderAddFeeding(void)
+
+static void Menu_RenderAddFeedingHours(void)
 {
 	LCD_Clear();
 	LCD_SetCursor(0, 0);
-	LCD_Print("Add Feeding");
+	LCD_Print("Hours/OK->Minutes");
 	LCD_SetCursor(1, 0);
-	LCD_Print("OK: Back");
+	LCD_Print2Digits(editHours);
+}
+
+static void Menu_RenderAddFeedingMinutes(void)
+{
+	LCD_Clear();
+	LCD_SetCursor(0, 0);
+	LCD_Print("Minutes/OK->Save");
+	LCD_SetCursor(1, 0);
+	LCD_Print2Digits(editMinutes);
+}
+
+static void Menu_RenderAddFeedingResult(void)
+{
+	const char *text = lastOperationSuccess ? "Added" : "Error";
+	LCD_Clear();
+	LCD_SetCursor(0, 0);
+	LCD_Print(text);
+	LCD_SetCursor(1, 0);
+	LCD_Print2Digits(editHours);
+	LCD_Print(":");
+	LCD_Print2Digits(editMinutes);
 }
 
 static void Menu_RenderDeleteFeeding(void)
@@ -169,9 +195,6 @@ static void Menu_RenderSetTime(void)
 	LCD_Print("OK: Back");
 }
 
-
-
-
 void Menu_Init(void)
 {
 	ButtonOkUpDown_Init();
@@ -179,9 +202,6 @@ void Menu_Init(void)
 	selectedItem = MENU_ITEM_SHOW_SCHEDULE;
 	Menu_RenderMainScreen();
 }
-
-#include "../drivers/timer.h"
-#include "../app/scheduler.h"
 
 void Menu_Process(void)
 {
@@ -244,8 +264,16 @@ void Menu_Process(void)
 						Menu_RenderShowSchedule();
 						break;
 						
-						case MENU_STATE_ADD_FEEDING:
-						Menu_RenderAddFeeding();
+						case MENU_STATE_ADD_FEEDING_HOURS:
+						Menu_RenderAddFeedingHours();
+						break;
+						
+						case MENU_STATE_ADD_FEEDING_MINUTES:
+						Menu_RenderAddFeedingMinutes();
+						break;
+						
+						case MENU_STATE_ADD_FEEDING_RESULT:
+						Menu_RenderShowSchedule();
 						break;
 
 						case MENU_STATE_DELETE_FEEDING:
@@ -295,7 +323,74 @@ void Menu_Process(void)
 					break;
 			}
 			break;
-		case MENU_STATE_ADD_FEEDING:
+			
+		case MENU_STATE_ADD_FEEDING_HOURS:
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+					menuState = MENU_STATE_ADD_FEEDING_MINUTES;
+					Menu_RenderAddFeedingMinutes();
+					break;
+
+				case BUTTON_EVENT_UP:
+					if (editHours >= 23) editHours = 0;
+					else editHours++;
+					Menu_RenderAddFeedingHours();
+					break;
+					
+				case BUTTON_EVENT_DOWN:
+					if (editHours == 0) editHours = 23;
+					else editHours--;
+					Menu_RenderAddFeedingHours();
+					break;
+					
+				case BUTTON_EVENT_NONE:
+				default:
+					break;
+			}
+			break;
+		case MENU_STATE_ADD_FEEDING_MINUTES:
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+				lastOperationSuccess = Scheduler_AddFeedingTime(editHours, editMinutes);
+				menuState = MENU_STATE_ADD_FEEDING_RESULT;
+				Menu_RenderAddFeedingResult();
+				break;
+					
+				case BUTTON_EVENT_UP:
+					if (editMinutes == 59)
+					{
+						editMinutes = 0;
+					} else editMinutes++;
+					Menu_RenderAddFeedingMinutes();
+					break;
+					
+				case BUTTON_EVENT_DOWN:
+					if (editMinutes == 0) editMinutes = 59;
+					else editMinutes--;
+					Menu_RenderAddFeedingMinutes();
+					break;
+					
+				case BUTTON_EVENT_NONE:
+				default:
+					break;
+			}
+			break;
+		case  MENU_STATE_ADD_FEEDING_RESULT:
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+				case BUTTON_EVENT_UP:
+				case BUTTON_EVENT_DOWN:
+				menuState = MENU_STATE_SHOW_SCHEDULE;
+				Menu_RenderShowSchedule();
+				break;
+				
+				case BUTTON_EVENT_NONE:
+				default: break;
+			}
+			break;
 		case MENU_STATE_DELETE_FEEDING:
 		case MENU_STATE_SET_TIME:
 		if (event == BUTTON_EVENT_OK)
