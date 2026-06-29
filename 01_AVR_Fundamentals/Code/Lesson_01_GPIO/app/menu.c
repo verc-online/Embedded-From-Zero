@@ -24,7 +24,10 @@ typedef enum
 	MENU_STATE_ADD_FEEDING_RESULT,
 	MENU_STATE_DELETE_FEEDING,
 	MENU_STATE_DELETE_FEEDING_RESULT,
-	MENU_STATE_SET_TIME
+	MENU_STATE_SET_TIME_HOURS,
+	MENU_STATE_SET_TIME_MINUTES,
+	MENU_STATE_SET_TIME_SECONDS,
+	MENU_STATE_SET_TIME_RESULT
 	
 } MenuState;
 
@@ -39,7 +42,7 @@ typedef enum
 
 static MenuState menuState = MENU_STATE_MAIN_SCREEN;
 static MenuItem selectedItem = MENU_ITEM_SHOW_SCHEDULE;
-
+static bool lastOperationSuccess = false;	
 static const char *menuItems[] =
 {
 	"Show Schedule",
@@ -49,11 +52,20 @@ static const char *menuItems[] =
 	"Back"
 };
 static uint8_t scheduleFirstVisibleIndex = 0;
+
+// Add feeding
 static uint8_t editHours = 8;
 static uint8_t editMinutes = 0;
-static bool lastOperationSuccess = false;	
+
+// Delete feeding
 static uint8_t deleteSelectedIndex = 0;
-	
+
+//Set Time
+static uint8_t editTimeHours;
+static uint8_t editTimeMinutes;
+static uint8_t editTimeSeconds;
+RtcTime time;
+
 #define MENU_ITEMS_COUNT (sizeof(menuItems) / sizeof(menuItems[0]))
 
 static void Menu_RenderMainScreen(void)
@@ -110,7 +122,7 @@ static void Menu_SelectCurrentItem(void)
 		break;
 
 		case MENU_ITEM_SET_TIME:
-		menuState = MENU_STATE_SET_TIME;
+		menuState = MENU_STATE_SET_TIME_HOURS;
 		break;
 
 		case MENU_ITEM_BACK:
@@ -221,11 +233,40 @@ static void Menu_RenderDeleteFeedingResult(void)
 	}
 }
 
-static void Menu_RenderSetTime(void)
+static void Menu_RenderSetTimeHours(void)
 {
 	LCD_Clear();
 	LCD_SetCursor(0, 0);
-	LCD_Print("Set Time");
+	LCD_Print("Set Hours");
+	LCD_SetCursor(1, 0);
+	LCD_Print2Digits(editTimeHours);
+}
+
+static void Menu_RenderSetTimeMinutes(void)
+{
+	LCD_Clear();
+	LCD_SetCursor(0, 0);
+	LCD_Print("Set Minutes");
+	LCD_SetCursor(1, 0);
+	LCD_Print2Digits(editTimeMinutes);
+}
+
+static void Menu_RenderSetTimeSeconds(void)
+{
+	LCD_Clear();
+	LCD_SetCursor(0, 0);
+	LCD_Print("Set Seconds");
+	LCD_SetCursor(1, 0);
+	LCD_Print2Digits(editTimeSeconds);
+}
+
+static void Menu_RenderSetTimeResult(void)
+{
+	LCD_Clear();
+	LCD_SetCursor(0, 0);
+	const char * text = lastOperationSuccess ? "Succes" : "Error";
+	LCD_Print(text);
+	
 	LCD_SetCursor(1, 0);
 	LCD_Print("OK: Back");
 }
@@ -236,6 +277,28 @@ void Menu_Init(void)
 	menuState = MENU_STATE_MAIN_SCREEN;
 	selectedItem = MENU_ITEM_SHOW_SCHEDULE;
 	Menu_RenderMainScreen();
+}
+
+
+static void Menu_StartSetTime(void)
+{
+	RtcTime time;
+
+	if (DS3231_ReadTime(&time))
+	{
+		editTimeHours = time.hours;
+		editTimeMinutes = time.minutes;
+		editTimeSeconds = time.seconds;
+	}
+	else
+	{
+		editTimeHours = 0;
+		editTimeMinutes = 0;
+		editTimeSeconds = 0;
+	}
+
+	menuState = MENU_STATE_SET_TIME_HOURS;
+	Menu_RenderSetTimeHours();
 }
 
 void Menu_Process(void)
@@ -307,8 +370,9 @@ void Menu_Process(void)
 						Menu_RenderDeleteFeeding();
 						break;
 
-						case MENU_STATE_SET_TIME:
-						Menu_RenderSetTime();
+						case MENU_STATE_SET_TIME_HOURS:
+						Menu_StartSetTime();
+						Menu_RenderSetTimeHours();
 						break;
 
 						default:
@@ -477,12 +541,106 @@ void Menu_Process(void)
 				default: break;
 			}
 			break;
-		case MENU_STATE_SET_TIME:
-		if (event == BUTTON_EVENT_OK)
-		{
-			menuState = MENU_STATE_MENU;
-			Menu_RenderMenu();
-		}
-		break;
+		case MENU_STATE_SET_TIME_HOURS:
+			
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+				menuState = MENU_STATE_SET_TIME_MINUTES;
+				Menu_RenderSetTimeMinutes();
+				break;
+
+				case BUTTON_EVENT_UP:
+				if (editTimeHours >= 23) editTimeHours = 0;
+				else editTimeHours++;
+				Menu_RenderSetTimeHours();
+				break;
+				
+				case BUTTON_EVENT_DOWN:
+				if (editTimeHours == 0) editTimeHours = 23;
+				else editTimeHours--;
+				Menu_RenderSetTimeHours();
+				break;
+				
+				case BUTTON_EVENT_NONE:
+				default:
+				break;
+				
+			}
+			
+			break;
+		
+		case MENU_STATE_SET_TIME_MINUTES:
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+				menuState = MENU_STATE_SET_TIME_SECONDS;
+				Menu_RenderSetTimeSeconds();
+				break;
+
+				case BUTTON_EVENT_UP:
+				if (editTimeMinutes >= 59) editTimeMinutes = 0;
+				else editTimeMinutes++;
+				Menu_RenderSetTimeMinutes();
+				break;
+				
+				case BUTTON_EVENT_DOWN:
+				if (editTimeMinutes == 0) editTimeMinutes = 59;
+				else editTimeMinutes--;
+				Menu_RenderSetTimeMinutes();
+				break;
+				
+				case BUTTON_EVENT_NONE:
+				default:
+				break;
+			}
+			break;
+		
+		case MENU_STATE_SET_TIME_SECONDS:
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+					menuState = MENU_STATE_SET_TIME_RESULT;
+					RtcTime time = {editTimeHours, editTimeMinutes, editTimeSeconds};
+					lastOperationSuccess = DS3231_SetTime(&time);
+					Menu_RenderSetTimeResult();
+					break;
+
+				case BUTTON_EVENT_UP:
+					if (editTimeSeconds >= 59) editTimeSeconds = 0;
+					else editTimeSeconds++;
+					Menu_RenderSetTimeSeconds();
+					break;
+				
+				case BUTTON_EVENT_DOWN:
+					if (editTimeSeconds == 0) editTimeSeconds = 59;
+					else editTimeSeconds--;
+					Menu_RenderSetTimeSeconds();
+					break;
+				
+				case BUTTON_EVENT_NONE:
+					default:
+					break;
+			}
+			break;
+		
+		case MENU_STATE_SET_TIME_RESULT:
+			switch(event)
+			{
+				case BUTTON_EVENT_OK:
+				case BUTTON_EVENT_UP:
+				case BUTTON_EVENT_DOWN:
+					menuState = MENU_STATE_MAIN_SCREEN;
+					Menu_RenderMainScreen();
+					break;
+					
+				case BUTTON_EVENT_NONE:
+				default:
+				break;
+			}
+			break;
+		
+		default:
+			break;
 	}
 }
