@@ -23,20 +23,18 @@
 
 int main(void)
 {
-	Led_Init();
 	Timer_Init();
-	Servo_Init();
-	TWI_Init();
-	UART_Init();
-	Feeder_Init();
-	Scheduler_Init();
+ 	Servo_Init();
+ 	TWI_Init();
+ 	UART_Init();
+ 	Feeder_Init();
+ 	Scheduler_Init();
 	Command_Init();
 	LCD_Init();
 	Menu_Init();
 		
 	
 	DEBUG_LOG("System start");
-
     while (1) 
     {
 		Scheduler_Process();
