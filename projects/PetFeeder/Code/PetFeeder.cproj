@@ -12,9 +12,9 @@
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.elf</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>Lesson_01_GPIO</AssemblyName>
-    <Name>Lesson_01_GPIO</Name>
-    <RootNamespace>Lesson_01_GPIO</RootNamespace>
+    <AssemblyName>PetFeeder</AssemblyName>
+    <Name>PetFeeder</Name>
+    <RootNamespace>PetFeeder</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
