@@ -131,9 +131,37 @@ static void Menu_SelectCurrentItem(void)
 	}
 }
 
+static void Menu_NormalizeScheduleIndex(void)
+{
+	uint8_t count = Scheduler_GetFeedingCount();
+
+	if (count == 0)
+	{
+		scheduleFirstVisibleIndex = 0;
+		return;
+	}
+
+	if (scheduleFirstVisibleIndex >= count)
+	{
+		scheduleFirstVisibleIndex = count - 1;
+	}
+}
+
 static void Menu_RenderShowSchedule(void)
 {
 	LCD_Clear();
+
+	if (Scheduler_GetFeedingCount() == 0)
+	{
+		LCD_SetCursor(0, 0);
+		LCD_Print("Schedule empty");
+
+		LCD_SetCursor(1, 0);
+		LCD_Print("OK: Back");
+		return;
+	}
+
+	Menu_NormalizeScheduleIndex();
 
 	FeedingTime time;
 
@@ -143,13 +171,6 @@ static void Menu_RenderShowSchedule(void)
 		LCD_Print2Digits(time.hours);
 		LCD_Print(":");
 		LCD_Print2Digits(time.minutes);
-	}
-	else
-	{
-		LCD_Print("Schedule is empty");
-		LCD_SetCursor(1, 0);
-		LCD_Print("Add feeding time");
-		return;
 	}
 
 	LCD_SetCursor(1, 0);
@@ -533,6 +554,7 @@ void Menu_Process(void)
 				case BUTTON_EVENT_OK:
 				case BUTTON_EVENT_UP:
 				case BUTTON_EVENT_DOWN:
+				
 				menuState = MENU_STATE_SHOW_SCHEDULE;
 				Menu_RenderShowSchedule();
 				break;
