@@ -7,16 +7,18 @@
 #include <avr/io.h>
 #include "uart.h"
 
+#define UART_BAUD_9600_1MHZ_U2X 12
+
 void UART_Init(void)
 {
 	// 9600 baud при F_CPU = 1 MHz, U2X = 1
 	UBRRH = 0;
-	UBRRL = 12;
+	UBRRL = UART_BAUD_9600_1MHZ_U2X;
 
 	// Double Speed Mode
 	UCSRA |= (1 << U2X);
 
-	// ¬ключаем только передачу UART
+	// ¬ключаем
 	UCSRB = (1 << TXEN) | (1 << RXEN);
 
 	// UCSRC и UBRRH имеют общий адрес в ATmega8.
